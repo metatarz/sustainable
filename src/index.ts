@@ -1,95 +1,73 @@
-import TransferCollect from './collect/transfer.collect'
-import Connection from './connection/connection'
-import { Commander } from './collect/commander';
+import Connection from './connection/connection';
+import {Commander} from './collect/commander';
+import {generate} from './helpers/uuid-generator';
+import fs from 'fs';
+import path from 'path';
+// Fetched dynamically. New requests url here
+const url = ['https://elpais.com/espana/'];
 
-import {DEFAULT} from './config/configuration'
-import CollectTransfer from './collect/transfer.collect';
-//fetched dynamically. New requests url here
-const url = ['https://www.example.org','https://www.cartesdamor.cat'];
+/* SetTimeout(() => {
+	url.push('http://example.org/')
+	console.log('new url appended')
 
+}, 60000);
+*/
 
 const connection = new Connection();
 const commander = new Commander();
-const collectTransfer = new CollectTransfer();
 
+(async () => {
+	const cluster = await connection.setUp();
+	try {
+		if (cluster) {
+			async function handler(passContextRaw: any) {
+				// Mock project Id
+				const projectId = generate();
+				// BeforePass
+				const {page, data: url} = passContextRaw;
+				const _page = await commander.setUp(page, projectId);
+				const passContext = {page: _page, data: url};
+				// AtPass
 
-(async ()=>{
-    try{
-    
-    //initial variables
-    //start
-    const cluster = await connection.setUp()
-    const audits = DEFAULT.AUDITS
-    //const page = await commander.setUp()
+				await Promise.all([
+					commander.asyncEvaluate(passContext, projectId),
+					Commander.navigate(_page!, url)
+				]);
 
-    async function asyncEvaluate(passContextRaw:any){
+				fs.writeFile(
+					path.resolve(__dirname, '../traces/datalog.json'),
+					JSON.stringify(commander._dataLog),
+					err => console.error(err)
+				);
 
-        try{
-        let {page,data:url} = passContextRaw
-        //commander.page=page
-        
-        let _page = await commander.setUp(page)
-        
+			}
 
-        let passContext = {page:_page,data:url}
-        
-        audits.TRANSFER.forEach(async target=>{
-            switch (target){
-                case 'requests_limitation':
-                    await collectTransfer.afterPass(passContext)
-                default:
-                return
-            }
-        })
-        
-        
-        await Commander.navigate(_page,url)
-        console.log(_page)
-        
-    }catch(e){
-        console.error(e);
-        
-    }
-        
-    }
-  
-    
-    url.forEach(url=>{
-        cluster.queue(url,asyncEvaluate)
-        
-        
-    })
+			url.forEach(url => {
+				cluster.queue(url, handler);
+			});
 
-    //Gather traces
-    
-    
+			// Gather traces
 
-    
-    
+			// page events
 
-    //page events
+			// const results = await cluster.execute(url, TransferCollect.afterPass)
+			// await new Promise(resolve => setTimeout(resolve, 15000));
 
-    
+			await cluster.idle();
+			await cluster.close();
 
+			process.on('unhandledRejection', async (reason, p) => {
+				console.error(reason,p);
+				throw new Error('Unhandled Rejection at Promise');
+			});
 
-    //const results = await cluster.execute(url, TransferCollect.afterPass)
-    await cluster.idle()
-    await cluster.close()
+			// BeforePass phase
 
-    process.on('unhandledRejection', async (reason, p) => {
-        throw new Error('Unhandled Rejection at Promise');
-      });
+			// pass phase
 
-    
-
-    //beforePass phase
-    
-    //pass phase
-
-    //afterPass phase
-    
-    }catch(e){
-        console.error(e);
-        
-    }
-})()
+			// afterPass phase
+		}
+	} catch (error) {
+		console.error('index:', error);
+	}
+})();

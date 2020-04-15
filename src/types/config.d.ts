@@ -1,55 +1,59 @@
-import { ClusterOptions } from "./cluster-options.interface";
+import {ClusterOptions} from './cluster-options.interface';
 
 declare global {
-    module SA{
-        module Config{
+	namespace SA {
+		namespace Config {
+			export interface DefaultOptions {
+				PUPPETEER_OPTIONS: ClusterOptions;
+				CONNECTION_OPTIONS: {
+					emulatedDevices: EmulatedDevice[];
+					locations: EmulatedLocation[];
+				};
+				AUDITS: {
+					JS: string[];
+					CSS: string[];
+					HTML: string[];
+					MEDIA: string[];
+					FONTS: string[];
+					TRANSFER: string[];
+					GENERAL: string[];
+					SERVER: string[];
+				};
+				REPORT: {
+					scoringWeight: {[key: string]: number};
+					format?: string;
+					webhook?: string;
+				};
+			}
 
-            export interface DefaultOptions {
+			export interface EmulatedDevice {
+				name: string;
+				userAgent: string;
+				viewport: Viewport;
+			}
 
-                PUPPETEER_OPTIONS:ClusterOptions
-                CONNECTION_OPTIONS: {
-                    emulatedDevices:EmulatedDevice[],
-                    locations:EmulatedLocation[]
-                }
-                AUDITS:{
-                    JS:Array<string>
-                    CSS:Array<string>
-                    HTML:Array<string>,
-                    MEDIA:Array<string>,
-                    FONTS:Array<string>,
-                    TRANSFER:Array<string>
-                    GENERAL:Array<string>,
-                    SERVER:Array<string>
-                }
-                REPORT:{
-                    scoring_weight:{[key:string]:number},
-                    format?:string,
-                    webhook?:string
-                }
-                
+			interface EmulatedLocation {
+				name: string;
+				latitude: number;
+				longitude: number;
+				accuracy: number;
+			}
 
-            }
+			interface Viewport {
+				width: number;
+				height: number;
+			}
 
-            export interface EmulatedDevice{
-                name:string,
-                userAgent:string,
-                viewport:Viewport,
-
-
-            }
-
-            interface EmulatedLocation{
-                name:string,
-                latitude:number,
-                longitude:number,
-                accuracy:number
-            }
-
-            interface Viewport{
-                width:number,
-                height:number
-            }
-
-    }
-        }
-            }
+			export interface Audit {
+				JS: 'JS';
+				CSS: 'CSS';
+				HTML: 'HTML';
+				MEDIA: 'MEDIA';
+				FONTS: 'FONTS';
+				TRANSFER: 'TRANSFER';
+				GENERAL: 'GENERAL';
+				SERVER: 'SERVER';
+			}
+		}
+	}
+}
