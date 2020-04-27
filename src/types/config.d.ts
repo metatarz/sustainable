@@ -54,6 +54,8 @@ declare global {
 				GENERAL: 'GENERAL';
 				SERVER: 'SERVER';
 			}
+			
 		}
 	}
 }
+export{}

@@ -7,11 +7,12 @@ import fs from 'fs';
 // @ts-ignore
 import {environment} from '../../environment';
 import {CollectConsole} from './console.collect';
-import {CollectCSS} from './css.collect';
+import {CollectAssets} from './assets.collect';
 import {CollectRedirect} from './redirect.collect';
 import {CollectFailedTransfers} from './failed-transfer.collect';
 import {CollectSubfont} from './subfont.collect';
 import {CollectPerformance} from './perf.collect';
+import { CollectImages } from './images.collect';
 
 interface Value {
 	prop: any;
@@ -90,7 +91,8 @@ export class Commander {
 				css: {},
 				transfer: {},
 				general: {},
-				fonts: {}
+				fonts: {},
+				media : {}
 			};
 
 			let html = false;
@@ -98,6 +100,7 @@ export class Commander {
 			let general = false;
 			let css = false;
 			let fonts = false;
+			let media = false;
 			await new Promise((resolve, reject) => {
 				if (dataLog) {
 					console.log('running tasks…');
@@ -142,7 +145,11 @@ export class Commander {
 								console.log(`Done ${k}`);
 								break;
 							case 'CSS':
-								dataLog.traces.css = await CollectCSS.afterPass(passContext);
+								const info = await CollectAssets.afterPass(passContext)
+								if (info){
+								dataLog.traces.css = info[0]
+								dataLog.traces.js = info[1]
+								}
 								css = true;
 								console.log(`Done ${k}`);
 								break;
@@ -154,6 +161,13 @@ export class Commander {
 								console.log(`Done ${k}`);
 
 								break;
+							
+							case 'MEDIA':
+								dataLog.traces.media.images = await CollectImages.afterPass(passContext)
+								media = true
+								
+								console.log(`Done ${k}`);
+								
 
 							default:
 								break;
@@ -164,7 +178,7 @@ export class Commander {
 			if (html && css && transfer && fonts && general)
 				console.log('done tasks');
 			dataLog.completed = true;
-			this._dataLog = [...this._dataLog, dataLog];
+			return dataLog
 		} catch (error) {
 			console.error('commander :', error);
 		}

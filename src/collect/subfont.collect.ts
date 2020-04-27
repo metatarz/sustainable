@@ -3,8 +3,10 @@ import Collect from './collect';
 export class CollectSubfont extends Collect {
 	static async afterPass(passContext: any, options?: any): Promise<any> {
 		try {
+
+			//may be interesting to give a try at Page._client.FontFamilies
 			const {page} = passContext;
-			await page.waitForNavigation();
+			await page.waitForNavigation()
 			const result = await page.evaluate(function(options_: any) {
 				try {
 					// @ts-ignore
@@ -17,8 +19,9 @@ export class CollectSubfont extends Collect {
 					console.error(error.message);
 				}
 			}, options);
-
+			
 			return result;
+			
 		} catch (error) {
 			console.error('Subfont-collect', error);
 		}

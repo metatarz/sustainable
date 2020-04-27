@@ -1,4 +1,5 @@
 import Collect from './collect';
+import { waitForNetworkIdle } from '../helpers/waitfor-networkidle';
 
 export class CollectFailedTransfers extends Collect {
 	static async atPass(passContext: any): Promise<any> {
@@ -22,8 +23,7 @@ export class CollectFailedTransfers extends Collect {
 
 		try {
 			console.log('waiting for navigation to load');
-
-			await page.waitForNavigation({waitUntil:'networkidle0'});
+			await page.waitForNavigation({waitUntil:'networkidle0'})
 			return result;
 		} catch (error) {
 			console.error('Failed-transfer-collect', error);

@@ -7,7 +7,7 @@ export class CollectHTML extends Collect {
 			const {page} = passContext;
 			const result = [];
 
-			await page.waitForNavigation();
+			await page.waitForSelector('body')
 			const javascriptHtml = await page.evaluate(
 				() => document.querySelector('*')!.outerHTML
 			);
@@ -33,7 +33,7 @@ export class CollectHTML extends Collect {
 					}
 				);
 			}
-			
+		
 			
 			return result;
 			

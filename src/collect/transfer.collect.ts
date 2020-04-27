@@ -11,10 +11,12 @@ export default class CollectTransfer extends Collect {
 			let CDP: any;
 			page._client.on('Network.loadingFinished', (data: any) => {
 				CDP = data;
+				
 			});
 
 			page.on('requestfinished', async (request: any) => {
 				const response = request.response();
+				
 
 				let responseBody;
 
@@ -27,6 +29,7 @@ export default class CollectTransfer extends Collect {
 					};
 				}
 
+				//delete dircular objects 
 				delete request._response;
 				delete response._request;
 				delete response._client;
@@ -37,10 +40,11 @@ export default class CollectTransfer extends Collect {
 				// console.log(response);
 
 				// check we are zipping it correctly
-				if (CDP.requestId === request._requestId) {
+				
+				if (CDP && request._requestId && CDP.requestId === request._requestId) {
 					const information = {
-						request,
-						response,
+						request:{...request},
+						response:{...response},
 						CDP
 					};
 

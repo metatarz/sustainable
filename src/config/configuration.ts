@@ -9,8 +9,8 @@ export const DEFAULT: SA.Config.DefaultOptions = {
 			args: ['--disable-dev-shm-usage', '--shm-size=1gb']
 		},
 		perBrowserOptions: undefined,
-		monitor: true,
-		timeout: 60 * 1000,
+		monitor: false,
+		timeout: 30 * 1000,
 		retryLimit: 0,
 		retryDelay: 0,
 		skipDuplicateUrls: false,
