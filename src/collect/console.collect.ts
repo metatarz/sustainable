@@ -6,6 +6,8 @@ export class CollectConsole extends Collect {
 		const {page} = passContext;
 
 		const results: object[] = [];
+
+		
 		page.on('console', async (message: ConsoleMessage) => {
 			const information = {
 				type: message.type(),
@@ -18,12 +20,16 @@ export class CollectConsole extends Collect {
 				}
 			}
 
+			  
+
 			results.push(information);
 		});
 
 		try {
 			await page.waitForNavigation({waitUntil:'networkidle0'});
-			return results;
+			return {
+				console: results
+			}
 		} catch (error) {
 			console.error('Console-collect', error);
 		}

@@ -119,9 +119,23 @@ export class CollectAssets extends Collect {
 				const cssInfo = {styleHrefs, styles};
 				const jsInfo = {scriptSrcs, scripts}
 
-				return {cssInfo, jsInfo}
+				return {css:cssInfo, js:jsInfo}
 			});
 
+
+			return {
+				assets:{
+					css:{
+						info:information.cssInfo,
+						sheets
+					},
+					js:{
+						info:information.jsInfo,
+						scripts
+					}
+				}
+			}
+			/*
 			return [
 				
 				{
@@ -133,6 +147,7 @@ export class CollectAssets extends Collect {
 				scripts
 			}
 			]
+			*/
 		} catch (error) {
 			console.error('CSS-COLLECT', error);
 		}

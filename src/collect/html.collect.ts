@@ -35,7 +35,9 @@ export class CollectHTML extends Collect {
 			}
 		
 			
-			return result;
+			return {
+				html:result
+			}
 			
 		} catch (error) {
 			console.error('HTML-COLLECT', error);

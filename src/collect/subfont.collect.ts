@@ -6,7 +6,7 @@ export class CollectSubfont extends Collect {
 
 			//may be interesting to give a try at Page._client.FontFamilies
 			const {page} = passContext;
-			await page.waitForNavigation()
+			await page.waitForNavigation({waitUntil:'networkidle0'})
 			const result = await page.evaluate(function(options_: any) {
 				try {
 					// @ts-ignore
@@ -20,7 +20,9 @@ export class CollectSubfont extends Collect {
 				}
 			}, options);
 			
-			return result;
+			return {
+				fonts:result
+			}
 			
 		} catch (error) {
 			console.error('Subfont-collect', error);

@@ -16,6 +16,10 @@ declare global{
 
 
         }
+        export type ScoreDisplayModes = 
+        'numeric'|'binary'|'manual'
+    
+        export type ScoreDisplayMode = Audit.ScoreDisplayModes[keyof Audit.ScoreDisplayModes];
 
         export interface Result{
 
@@ -28,9 +32,7 @@ declare global{
          * Binary 0 Failed, 1 Passed
          * Manual Requires the user for manual checking
          */
-        export interface ScoreDisplayMode {
-            display:'numeric'|'binary'|'manual'
-        }
+   
     }
 }
 

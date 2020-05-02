@@ -16,7 +16,8 @@ export class CollectRedirect extends Collect {
 					response.headers().location,
 					url
 				).toString();
-				const information = {url, redirectsTo};
+				const information = {requestId:response._request._requestId, 
+					url, redirectsTo, redirectChain: response._request._redirectChain};
 
 				results.push(information);
 			}
@@ -25,7 +26,9 @@ export class CollectRedirect extends Collect {
 			console.log('waiting for navigation to load');
 
 			await page.waitForNavigation({waitUntil:'networkidle0'});
-			return results;
+			return {
+				 redirect:results
+			}
 		} catch (error) {
 			console.log('Redirect-Collect', error);
 		}

@@ -4,9 +4,10 @@ import {generate} from './helpers/uuid-generator';
 import fs from 'fs';
 import path from 'path';
 import {environment} from '../environment'
-import { CarbonFootprintAudit } from './audits/CarbonFootprint.audit';
-// Fetched dynamically. New requests url here
-const url = ['http://example.org'];
+import { safeReject } from './helpers/safeReject';
+// Fetched dynamically. New requests url here (must include www)
+//protocol error network.getResponseBody no resource with given identifier found with url: https://www.uoc.edu
+const url = ['https://www.uoc.edu'];
 
 /* SetTimeout(() => {
 	url.push('http://example.org/')
@@ -21,33 +22,54 @@ const connection = new Connection();
 
 (async () => {
 	const cluster = await connection.setUp();
+
 	try {
 		if (cluster) {
 			async function handler(passContextRaw: any) {
+				
+			
 				// Mock project Id
 				const projectId = generate();
 				//important! Place it inside the handler (1 url, 1 commander instance)
 				const commander = new Commander(); 
-				// BeforePass
+				
 				const {page, data: url} = passContextRaw;
-				const _page = await commander.setUp(page, projectId);
-				const passContext = {page: _page, data: url};
-				// AtPassd
+				const _page = await commander.setUp(passContextRaw, projectId, cluster);
+				const passContext = {page: _page, data: url}
 
-				//@ts-ignore 
+
+				//@ts-ignore allSettled is not yet typed
+				
 				const results = await Promise.allSettled([
-					commander.asyncEvaluate(passContext, projectId),
-					Commander.navigate(_page!, url)
+					commander.navigate(_page!, url),
+					commander.asyncEvaluate(passContext)
+					
 				]);
 
-				const transferArtifacts = results[0].value.traces.transfer
+				//console.log(results[0]);
+				
+
 				
 				
-				const carbonAudit = CarbonFootprintAudit.audit(transferArtifacts.reqres.map((obj:any)=>{
+				//await commander.updateDataLog(results[0].value)
+				//console.log(commander._dataLog.traces);
+				
+				
+				
+
+
+				
+
+				
+				
+				/*
+				const carbonAudit = CarbonFootprintAudit.audit(transferArtifacts.record.map((obj:any)=>{
 					return {
 						response:obj.response
 					}
 				}))
+				*/
+				
 				
 				
 				
@@ -91,6 +113,7 @@ const connection = new Connection();
 			// afterPass phase
 		}
 	} catch (error) {
-		console.error('index:', error);
+		safeReject(error)
+	
 	}
 })();

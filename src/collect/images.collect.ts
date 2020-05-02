@@ -16,7 +16,8 @@ export class CollectImages extends Collect{
                     return attrObj
                 })
             })
-            console.log(information); 
-        return information
+        return {
+            media:information
+        }
     }
 }

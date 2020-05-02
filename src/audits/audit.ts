@@ -4,7 +4,7 @@ export default class Audit{
     return {} as SA.Audit.Meta
    }
 
-   static async audit(artifacts:Array<string>){
+   static audit(traces:Array<string>):Promise<SA.Audit.Result> | SA.Audit.Result{
 
     return {} as SA.Audit.Result
    }

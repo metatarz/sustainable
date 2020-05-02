@@ -16,8 +16,7 @@ export default class Connection {
 				this._options = options;
 			}
 
-			this._cluster = await Cluster.launch(this._options);
-
+			this._cluster = await Cluster.launch(this._options);			
 			this._cluster.on('taskerror', (err, data) => {
 				throw new Error(`Error crawling ${data}: ${err.message}`);
 			});

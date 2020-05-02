@@ -14,7 +14,9 @@ export class CollectFailedTransfers extends Collect {
 				const information = {
 					url,
 					code: status,
-					response
+					statusText:response._statusText,
+					failureText:response._request._failureText,
+					requestId:response._request._requestId
 				};
 
 				result.push(information);
@@ -24,7 +26,9 @@ export class CollectFailedTransfers extends Collect {
 		try {
 			console.log('waiting for navigation to load');
 			await page.waitForNavigation({waitUntil:'networkidle0'})
-			return result;
+			return {
+				failed:result
+			}
 		} catch (error) {
 			console.error('Failed-transfer-collect', error);
 		}

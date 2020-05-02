@@ -13,24 +13,48 @@ import {CollectFailedTransfers} from './failed-transfer.collect';
 import {CollectSubfont} from './subfont.collect';
 import {CollectPerformance} from './perf.collect';
 import { CollectImages } from './images.collect';
+import SystemMonitor from '../vendors/SystemMonitor';
+import { performance } from '../helpers/now';
+import { createTracker, safeReject } from '../helpers/safeReject';
+import { Cluster } from 'puppeteer-cluster';
+import Collect from './collect';
+import { CarbonFootprintAudit } from '../audits/CarbonFootprint.audit';
 
-interface Value {
-	prop: any;
-}
-interface DataLog {
-	[name: string]: Value | any;
-}
 
 export class Commander {
 	_options = DEFAULT.CONNECTION_OPTIONS;
 	_audits = DEFAULT.AUDITS;
 	_appOptions = environment;
-	_dataLog: DataLog[] = [];
-	async setUp(page: Page, pId: string, options?: any) {
+	_dataLog = {} as SA.DataLog.Format;
+	_startTime=performance.now()
+	_tracker:any
+	_cluster={} as Cluster
+	async setUp(passContext:any, pId: string, cluster:Cluster, options?: any) {
 		try {
+			const {page, data:url} = passContext
 			if (options) {
 				this._options = options;
 			}
+			this._dataLog = {
+				uid: pId,
+				 url:url, 
+				 monitor:[], 
+				 completed: false, 
+				 traces:{
+					html:[],
+					css:{info:{styleHrefs:[], styles:[]}},
+					js:{info:{scriptSrcs:[], scripts:[]}},
+					transfer:{record:[],failed:[],redirect:[]},
+					general:{console:[], performance:{perf:<Performance>{},metrics:<SA.DataLog.Metrics>{}}},
+					media:{images:[]},
+					fonts:{subfonts:{}}
+					
+
+			}
+		};
+			this._tracker = createTracker(page)
+			this._cluster = cluster
+			this.systemMonitor(this._startTime,'start')
 
 			// Customable
 			// page.setJavaScriptEnabled(false); Speeds up process drastically
@@ -39,10 +63,12 @@ export class Commander {
 				height: this._options.emulatedDevices[0].viewport.height
 			});
 			page.setUserAgent(this._options.emulatedDevices[0].userAgent);
+			
+			await page.browserContext().overridePermissions(url, ['geolocation']);
 			page.setGeolocation({
-				latitude: this._options.locations[0].latitude,
-				longitude: this._options.locations[0].longitude,
-				accuracy: this._options.locations[0].accuracy
+				latitude: this._options.locations[1].latitude,
+				longitude: this._options.locations[1].longitude,
+				accuracy: this._options.locations[1].accuracy
 			});
 			// We dont want the browser to cache our files
 			page.setCacheEnabled(false);
@@ -64,11 +90,11 @@ export class Commander {
 			return page;
 		
 		} catch (error) {
-			console.error(error);
+			safeReject(new Error(`Setup error ${error}`))
 		}
 	}
 
-	static async navigate(page: Page, url: string) {
+	async navigate(page: Page, url: string) {
 		try {
 			console.log('navigating…');
 			await page.goto(url, {
@@ -77,112 +103,174 @@ export class Commander {
 			});
 			console.log('done navigation');
 		} catch (error) {
-			console.error('navigation', error);
+			await safeReject(error, this._tracker, this._cluster)
 		}
 	}
 
-	async asyncEvaluate(passContext: any, pId: string) {
+	async asyncEvaluate(passContext: any) {
 		try {
-			// Const dataLog = this._dataLog.find((_pId)=>_pId.id===pId)
-			// TODO Type DataLog
-			const dataLog: any = {id: pId, completed: false, traces: {}};
-			dataLog.traces = {
-				html: {},
-				css: {},
-				transfer: {},
-				general: {},
-				fonts: {},
-				media : {}
-			};
-
-			let html = false;
-			let transfer = false;
-			let general = false;
-			let css = false;
-			let fonts = false;
-			let media = false;
-			await new Promise((resolve, reject) => {
-				if (dataLog) {
+			// Const this._dataLog = this._this._dataLog.find((_pId)=>_pId.id===pId)
+			// TODO Type DataLo
+			const {page, data:url} = passContext
+			
+				if (this._dataLog) {
 					console.log('running tasks…');
-
-					Object.keys(this._audits).forEach(async (k: string) => {
+					//@ts-ignore
+					return (Object.keys(this._audits).map(async (k: string) => {
 						switch (k) {
+							/*
 							case 'HTML':
-								dataLog.traces.html = await CollectHTML.afterPass(
+								 const htmlTraces = await CollectHTML.afterPass(
 									passContext,
 									this._appOptions
 								);
-								html = true;
-								console.log(`Done ${k}`);
-								resolve();
-								break;
+	
+								return console.log(htmlTraces);
+								
+							*/
 
 							case 'TRANSFER':
-								const output = await Promise.all([
+								const transfer = await Promise.allSettled([
 									CollectTransfer.atPass(passContext),
 									CollectFailedTransfers.atPass(passContext),
 									CollectRedirect.atPass(passContext)
 								]);
 
-								dataLog.traces.transfer.reqres = output[0];
-								dataLog.traces.transfer.failed = output[1];
-								dataLog.traces.transfer.redirect = output[2];
-								transfer = true;
-								console.log(`Done ${k}`);
-
-								break;
+								const transferTraces = Collect.parseAllSettled(transfer)
+								
+								
+								await CarbonFootprintAudit.audit(transferTraces,url)
 
 							case 'GENERAL':
-								const generalOut = await Promise.all([
+
+
+			
+								/*
+								const general = await Promise.allSettled([
 									CollectConsole.afterPass(passContext, this._appOptions),
 									CollectPerformance.afterPass(passContext)
 								]);
 
-								dataLog.traces.general.console = generalOut[0];
-								dataLog.traces.general.performance = generalOut[1];
-
-								general = true;
-								console.log(`Done ${k}`);
-								break;
+								const generalTraces = Collect.parseAllSettled(general)
+								
+							
+								
 							case 'CSS':
-								const info = await CollectAssets.afterPass(passContext)
-								if (info){
-								dataLog.traces.css = info[0]
-								dataLog.traces.js = info[1]
-								}
-								css = true;
-								console.log(`Done ${k}`);
-								break;
+								const assets = await CollectAssets.afterPass(passContext)
+								const assetsTraces = Collect.parseAllSettled(assets)
+								
+								
 							case 'FONTS':
-								dataLog.traces.fonts.subfonts = await CollectSubfont.afterPass(
+								const fonts = await CollectSubfont.afterPass(
 									passContext
 								);
-								fonts = true;
-								console.log(`Done ${k}`);
-
-								break;
-							
+								
+								const fontsTraces = Collect.parseAllSettled(fonts)
+								
+						
 							case 'MEDIA':
-								dataLog.traces.media.images = await CollectImages.afterPass(passContext)
-								media = true
-								
-								console.log(`Done ${k}`);
-								
-
+								const media = await CollectImages.afterPass(passContext)
+								const mediaTraces = Collect.parseAllSettled(media)
+								*/
 							default:
 								break;
 						}
-					});
+					})
+					)
 				}
-			});
-			if (html && css && transfer && fonts && general)
-				console.log('done tasks');
-			dataLog.completed = true;
-			return dataLog
+			
+				
+				
+				
+		
+
+		
+	
+
 		} catch (error) {
 			console.error('commander :', error);
 		}
 	}
+
+	async systemMonitor(time:any, id:string){
+		try{
+		let cpuUsage:number=0
+		let memUsage:number=0
+
+		const systemMonitor = new SystemMonitor()
+		await systemMonitor.init()
+		const monitor =  () =>
+		 cpuUsage = systemMonitor.getCpuUsage().toFixed(1) 
+		 memUsage =systemMonitor.getMemoryUsage().toFixed(1)
+		monitor()
+
+		const info = {
+			id:id,
+			cpu:cpuUsage,
+			memory:memUsage,
+			timestamp:performance.now(time)
+		}
+		
+
+		this._dataLog.monitor.push(info)
+		systemMonitor.close()
+	}catch(error){
+		console.log('System Monitor', error);
+		
+	}
+	}
+
+	async updateDataLog(data){
+
+		await this.systemMonitor(this._startTime,'run')
+		data.map(result=>{
+			if(result.status === 'fulfilled' && result.value){
+				const keys = Object.keys(result.value)
+				if(!Array.isArray(result.value)){
+
+						keys.forEach(key =>{
+							//@ts-ignore
+							this._dataLog.traces[key] = {...result.value[key]}
+						})
+					}else{
+						console.log(result.value.map((a)=>{
+							return {
+								...a.result
+							}
+							
+							
+							//a.concat(b.result)))
+						}))
+						
+
+						
+					}
+				}
+				
+				
+					
+					
+					
+				
+						
+				
+					
+						
+						
+					
+					
+				})
+				this._dataLog.completed = true;
+			}
+			
+		
+		
+	
+
+	
+
+
+
 
 	/**
 	 * Validate DOMS
