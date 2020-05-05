@@ -3,6 +3,11 @@ import geoip from 'geoip-lite';
 import memoize from 'memoizee';
 import fetch from 'node-fetch'
 
+/**
+ * @fileoverview Compute gCO2eq / visit considering server location, 
+ *                  server greenness per individual resource.
+ */
+
 const GREEN_SERVER_API = 'http://api.thegreenwebfoundation.org/greencheck'
 export class CarbonFootprintAudit extends Audit{
     static get meta(){
