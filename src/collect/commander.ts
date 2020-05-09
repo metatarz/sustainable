@@ -19,6 +19,8 @@ import { createTracker, safeReject } from '../helpers/safeReject';
 import { Cluster } from 'puppeteer-cluster';
 import Collect from './collect';
 import { CarbonFootprintAudit } from '../audits/CarbonFootprint.audit';
+import { UsesCompressionAudit } from '../audits/UsesCompression.audit';
+import { UsesHTTP2Audit } from '../audits/UsesHTTP2.audit';
 
 
 export class Commander {
@@ -58,34 +60,32 @@ export class Commander {
 
 			// Customable
 			// page.setJavaScriptEnabled(false); Speeds up process drastically
-			page.setViewport({
-				width: this._options.emulatedDevices[0].viewport.width,
-				height: this._options.emulatedDevices[0].viewport.height
-			});
-			page.setUserAgent(this._options.emulatedDevices[0].userAgent);
-			
-			await page.browserContext().overridePermissions(url, ['geolocation']);
-			page.setGeolocation({
-				latitude: this._options.locations[1].latitude,
-				longitude: this._options.locations[1].longitude,
-				accuracy: this._options.locations[1].accuracy
-			});
-			// We dont want the browser to cache our files
-			page.setCacheEnabled(false);
-			// Careful with this
-			page.setDefaultNavigationTimeout(0);
-			// Glyphhanger setup
-			// must run here important!
-			await page.setBypassCSP(true);
-			await page.evaluateOnNewDocument(
-				fs.readFileSync(require.resolve('characterset'), 'utf8')
-			);
-			await page.evaluateOnNewDocument(
-				fs.readFileSync(
-					path.resolve(__dirname, '../helpers/glyphhanger-script.js'),
-					'utf8'
+
+			await Promise.all([
+				page.setViewport({
+					width: this._options.emulatedDevices[0].viewport.width,
+					height: this._options.emulatedDevices[0].viewport.height
+				}),
+				page.setUserAgent(this._options.emulatedDevices[0].userAgent),
+				page.browserContext().overridePermissions(url, ['geolocation']),
+				page.setGeolocation({
+					latitude: this._options.locations[1].latitude,
+					longitude: this._options.locations[1].longitude,
+					accuracy: this._options.locations[1].accuracy
+				}),
+				page.setCacheEnabled(false),
+				page.setBypassCSP(true),
+				page.evaluateOnNewDocument(
+					fs.readFileSync(require.resolve('characterset'), 'utf8')
+				),
+				page.setDefaultNavigationTimeout(0),
+				page.evaluateOnNewDocument(
+					fs.readFileSync(
+						path.resolve(__dirname, '../helpers/glyphhanger-script.js'),
+						'utf8'
+					)
 				)
-			);
+					])
 
 			return page;
 		
@@ -112,11 +112,9 @@ export class Commander {
 			// Const this._dataLog = this._this._dataLog.find((_pId)=>_pId.id===pId)
 			// TODO Type DataLo
 			const {page, data:url} = passContext
-			
-				if (this._dataLog) {
 					console.log('running tasks…');
 					//@ts-ignore
-					const promiseArray= (Object.keys(this._audits).map(async (k: string) => {
+					const promiseArray = (Object.keys(this._audits).map(async (k: string) => {
 						switch (k) {
 							/*
 							case 'HTML':
@@ -138,8 +136,11 @@ export class Commander {
 
 								const transferTraces = Collect.parseAllSettled(transfer)
 								
-								
-								return CarbonFootprintAudit.audit(transferTraces,url)
+								return Promise.allSettled([
+									UsesCompressionAudit.audit(transferTraces),
+									CarbonFootprintAudit.audit(transferTraces,url),
+									UsesHTTP2Audit.audit(transferTraces,url)
+								])
 
 								/*
 							case 'GENERAL':
@@ -180,16 +181,6 @@ export class Commander {
 					)
 
 					return promiseArray
-					
-				}
-			
-				
-				
-				
-		
-
-		
-	
 
 		} catch (error) {
 			console.error('commander :', error);

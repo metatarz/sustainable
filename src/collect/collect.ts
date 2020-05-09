@@ -14,14 +14,22 @@ export default class Collect {
 
 	afterPass(passContext: PassContext): any {}
 
-	static parseAllSettled(data:any){
+	static parseAllSettled(data:any, audit?:boolean){
+
 		const map = data.map((res,ind)=>{
-			if(res.status === 'fulfilled'){
+			if(res.status === 'fulfilled' && res.value){
 				return res.value
-			}else{
+			}else if(res.status === 'rejected'){
 				safeReject(new Error(`Failed at index ${ind} and error: ${res.reason}`))
 			}
 			})
-		return Object.assign({}, ...map)
+		if(!audit){
+			return Object.assign({}, ...map)
+		}else{
+			return map
+				
+			
+		}
+		
 	}
 }

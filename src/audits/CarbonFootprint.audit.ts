@@ -7,7 +7,7 @@ import { DEFAULT } from "../config/configuration";
 import { sum } from "../bin/statistics";
 
 /**
- * @fileoverview Compute gCO2eq / visit considering server location, 
+ * @fileoverview Compute gCO2eq considering server location, 
  *                  server greenness per individual resource.
  */
 
@@ -27,9 +27,6 @@ export class CarbonFootprintAudit extends Audit{
     }
 
     static async audit(traces:any, url:string):Promise<SA.Audit.Result>{
-
-        const initialHost = new URL(url).host
-
 
         const getGeoLocation = (ip:string) => {
             //2 letter ISO-3166-1 country code https://www.iban.com/country-codes */
@@ -72,7 +69,7 @@ export class CarbonFootprintAudit extends Audit{
                         return {
                             id:record.request.requestId,
                             host:new URL(record.response.url).host,
-                            size:record.CDP.compressedSize,
+                            size:record.CDP.compressedSize.value,
                             unSize:record.response.uncompressedSize.value,
                             ip:record.response.remoteAddress.ip,
                             isGreen:isGreen[index]
@@ -101,26 +98,48 @@ export class CarbonFootprintAudit extends Audit{
             }
 
         const records = await getValidRecords();
-        //MAP location to co2eq/location  https://github.com/tmrowco/electricitymap-contrib/blob/master/config/co2eq_parameters.json
         
-                   
-        /*const ip = response.remoteAddress().ip
-        country = geoip.lookup(ip).country
-        */
        const totalTransfersize = sum(records.
        map((record:any)=>record.size))
 
+       const recordsByFileSize = traces.record.reduce((acc,record)=>{
+        acc[record.request.resourceType] = (acc[record.request.resourceType] + 
+            (record.CDP.compressedSize.value || record.response.uncompressedSize.value)  || 0)
+        return acc
+    }, {} as Record<string, number>)
+
+    const recordsByFileSizePercentage= Object.keys(recordsByFileSize).map((key) =>{
+        const val = (recordsByFileSize[key]/totalTransfersize*100).toFixed(2)
+
+        return {
+            [key]:val
+        }
+    })
+
+
         const totalWattage= records.
         map((record:any)=>{
-            let size = record.size/MB_TO_BYTES
+            let size;
+            if(record.size !==0){
+                size = record.size
+            }else{
+                size = record.unSize
+            }
+
+           
+            
+            size = size/(MB_TO_BYTES*GB_TO_MB)
             if(record.isGreen){
                 size*=variables.coreNetwork[0]
             }else{
                 size*=(variables.dataCenter[0]+variables.coreNetwork[0])
             }
             
-            return size/GB_TO_MB
+            return size
         })
+
+    
+        
 
         //apply references values
         const metric = sum(totalWattage)*variables.defaultCarbonIntensity[0]*
@@ -130,20 +149,20 @@ export class CarbonFootprintAudit extends Audit{
 
         const score = Audit.computeLogNormalScore({median, p10}, metric)   
         
-        console.log(metric,score);
-        
-
 
         return {
+            meta:CarbonFootprintAudit.meta,
             score:score,
             scoreDisplayMode:'numeric',
             extendedInfo:{
                 value:{
                     totalTransfersize,
                     totalWattage:sum(totalWattage),
-                    metric
+                    metric,
+                    share:recordsByFileSizePercentage
                 }
             }
+            
 
 
         }

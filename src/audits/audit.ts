@@ -1,4 +1,5 @@
-import { getLogNormalScore } from './../bin/statistics'
+import { getLogNormalScore, sum } from './../bin/statistics'
+import { DEFAULT } from '../config/configuration';
 
 export default class Audit{
 
@@ -6,7 +7,7 @@ export default class Audit{
     return {} as SA.Audit.Meta
    }
 
-   static audit(traces:Array<string>, url:string):Promise<SA.Audit.Result> | SA.Audit.Result{
+   static audit(traces:Array<string>, url?:string):Promise<SA.Audit.Result> | SA.Audit.Result{
     return {} as SA.Audit.Result
    }
    /**
@@ -27,6 +28,12 @@ export default class Audit{
     }
 
    static clampTo2Decimals = (val:number) => Math.round(val * 100) / 100; 
+
+   static computeScore(audits:any){
+      const transferScoring = DEFAULT.REPORT.scoringWeight.transfer
+      const score = sum(audits.map(el=>el.value.score))
+      return Math.round((score/audits.length)*transferScoring*100)
+   }  
 
 
 }

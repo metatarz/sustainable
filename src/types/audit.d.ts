@@ -25,8 +25,10 @@ declare global{
 
             score:number | null,
             scoreDisplayMode:ScoreDisplayMode,
+            meta:Meta
             extendedInfo?:{value:ExtendedInfo},
-            errorMessage?:string
+            errorMessage?:string,
+
         }
 
         export interface ExtendedInfo{

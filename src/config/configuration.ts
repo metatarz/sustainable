@@ -10,7 +10,7 @@ export const DEFAULT: SA.Config.DefaultOptions = {
 		},
 		perBrowserOptions: undefined,
 		monitor: true,
-		timeout: 30 * 1000,
+		timeout: 40 * 1000,
 		retryLimit: 0,
 		retryDelay: 0,
 		skipDuplicateUrls: false,
@@ -130,13 +130,13 @@ export const DEFAULT: SA.Config.DefaultOptions = {
 
 	REPORT: {
 		scoringWeight: {
-			server: 3,
-			js: 2,
-			css: 1,
-			html: 1,
-			fonts: 1,
-			media: 2,
-			transfer: 3
+			server: 0.23076923076923078,
+			js: 0.15384615384615385,
+			css: 0.07692307692307693,
+			html: 0.07692307692307693,
+			fonts: 0.07692307692307693,
+			media: 0.15384615384615385,
+			transfer: 0.23076923076923078
 		},
 		scoring:{
 			CF:{median:11, p10:3, name:'Carbon Footprint'}

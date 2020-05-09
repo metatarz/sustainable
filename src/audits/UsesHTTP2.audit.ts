@@ -15,24 +15,23 @@ export class UsesHTTP2Audit extends Audit{
         }
     }
 /**
- * TODO: Need to find a better way of universal accessing basic dataLog info (like url)
  * @param traces requiredTraces
  */
-    static audit(traces:any):SA.Audit.Result{
+    static audit(traces:any, url:string):SA.Audit.Result{
     
-
         const urls = new Set()
+        const initialHost = new URL(url).host
         
-        const resources = traces.record.filter((record:any)=>{
+        const resources = traces.record.filter((record:SA.DataLog.Record)=>{
 
+            const host = new URL(record.request.url).host
             if(record.response.fromServiceWorker) return false
             if(record.request.protocol ==='h2') return false
+            if(initialHost !==host) return false
             
             return true
        
         }).map((record:any)=>{
-            console.log(record.request._url);
-            
             return {
                 protocol:record.request.protocol,
                 url:record.request.url
@@ -44,8 +43,10 @@ export class UsesHTTP2Audit extends Audit{
         })
 
         return {
+            meta:UsesHTTP2Audit.meta,
             score:Number(resources.length === 0),
-            scoreDisplayMode:'numeric'
+            scoreDisplayMode:'binary'
+           
         }
 
 

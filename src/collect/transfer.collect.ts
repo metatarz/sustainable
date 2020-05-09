@@ -77,7 +77,7 @@ export default class CollectTransfer extends Collect {
 						},
 						CDP:{
 							timestamp:CDP.timestamp,
-							compressedSize:CDP.encodedDataLength,
+							compressedSize:{value:CDP.encodedDataLength, units:'bytes'},
 							shouldReportCorbBlocking:CDP.shouldReportCorbBlocking
 						}
 					};

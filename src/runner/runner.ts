@@ -5,6 +5,9 @@ import { safeReject } from '../helpers/safeReject';
 import {Queue, Worker, Job, QueueEvents} from 'bullmq'
 import { Cluster } from 'puppeteer-cluster';
 import { DEFAULT } from '../config/configuration';
+import Collect from '../collect/collect';
+import Audit from '../audits/audit';
+import { performance } from '../helpers/now';
 
 
 //protocol error network.getResponseBody no resource with given identifier found with url: https://www.uoc.edu
@@ -92,6 +95,7 @@ export default class Runner{
 
 		console.log('running handler');
 		
+		const startTime = Date.now()
 		const commander = new Commander()
 		// Mock project Id
 		const projectId = generate();
@@ -101,7 +105,6 @@ export default class Runner{
 		const _page = await commander.setUp(passContextRaw, projectId, this._cluster);
 		const passContext = {page: _page, data: url}
 		const promisesArray = await commander.asyncEvaluate(passContext)
-		console.log(promisesArray);
 		
 		//@ts-ignore allSettled lacks typescript support
 		const results = await Promise.allSettled([
@@ -109,7 +112,32 @@ export default class Runner{
 			...promisesArray!
 			
 		]);
-		return 1234
+
+		const resultsParsed = Collect.parseAllSettled(results,true)
+
+		const mapResult = resultsParsed[6].map(({value})=>{
+			return {
+				value
+			}
+		})
+
+		const globalScore = Audit.computeScore(mapResult)
+		const meta = {
+			id:projectId,
+			url:url,
+			timing:[startTime, Date.now()]
+		}
+		const mapAudit = mapResult.map((audit)=>{
+			return {
+				...audit,
+			}
+		})
+		
+		return {
+			globalScore,
+			meta,
+			audits:mapAudit,
+		}
 	}
 	
 }
