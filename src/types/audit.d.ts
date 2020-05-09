@@ -25,7 +25,12 @@ declare global{
 
             score:number | null,
             scoreDisplayMode:ScoreDisplayMode,
+            extendedInfo?:{value:ExtendedInfo},
             errorMessage?:string
+        }
+
+        export interface ExtendedInfo{
+            [key:string]:any
         }
         /**
          * Numeric [0,1]

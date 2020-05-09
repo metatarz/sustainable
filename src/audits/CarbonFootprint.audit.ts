@@ -2,6 +2,9 @@ import Audit from "./audit";
 import geoip from 'geoip-lite';
 import memoize from 'memoizee';
 import fetch from 'node-fetch'
+import { variables } from "../references/references";
+import { DEFAULT } from "../config/configuration";
+import { sum } from "../bin/statistics";
 
 /**
  * @fileoverview Compute gCO2eq / visit considering server location, 
@@ -9,6 +12,8 @@ import fetch from 'node-fetch'
  */
 
 const GREEN_SERVER_API = 'http://api.thegreenwebfoundation.org/greencheck'
+const MB_TO_BYTES = 1024 * 1024
+const GB_TO_MB = 1024
 export class CarbonFootprintAudit extends Audit{
     static get meta(){
 
@@ -95,30 +100,50 @@ export class CarbonFootprintAudit extends Audit{
                 })
             }
 
-        const records = await getValidRecords()
+        const records = await getValidRecords();
         //MAP location to co2eq/location  https://github.com/tmrowco/electricitymap-contrib/blob/master/config/co2eq_parameters.json
-        console.log(records);
         
                    
         /*const ip = response.remoteAddress().ip
         country = geoip.lookup(ip).country
         */
-        const totalTransfersize = traces.record.
-        map(
-            (el:any)=>el.response.uncompressedSize.value).
-        reduce(
-            (total:number,actual:number)=>total+actual)
+       const totalTransfersize = sum(records.
+       map((record:any)=>record.size))
 
-        //get constants from json file
-        const metric = totalTransfersize*0.95*400
-        //convert
+        const totalWattage= records.
+        map((record:any)=>{
+            let size = record.size/MB_TO_BYTES
+            if(record.isGreen){
+                size*=variables.coreNetwork[0]
+            }else{
+                size*=(variables.dataCenter[0]+variables.coreNetwork[0])
+            }
+            
+            return size/GB_TO_MB
+        })
 
+        //apply references values
+        const metric = sum(totalWattage)*variables.defaultCarbonIntensity[0]*
+                        variables.defaultDailyVisitors[0]
+
+        const {median, p10} = DEFAULT.REPORT.scoring.CF
+
+        const score = Audit.computeLogNormalScore({median, p10}, metric)   
+        
+        console.log(metric,score);
         
 
 
         return {
-            score:metric,
+            score:score,
             scoreDisplayMode:'numeric',
+            extendedInfo:{
+                value:{
+                    totalTransfersize,
+                    totalWattage:sum(totalWattage),
+                    metric
+                }
+            }
 
 
         }

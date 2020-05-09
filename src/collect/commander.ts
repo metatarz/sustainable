@@ -116,7 +116,7 @@ export class Commander {
 				if (this._dataLog) {
 					console.log('running tasks…');
 					//@ts-ignore
-					return (Object.keys(this._audits).map(async (k: string) => {
+					const promiseArray= (Object.keys(this._audits).map(async (k: string) => {
 						switch (k) {
 							/*
 							case 'HTML':
@@ -139,8 +139,9 @@ export class Commander {
 								const transferTraces = Collect.parseAllSettled(transfer)
 								
 								
-								await CarbonFootprintAudit.audit(transferTraces,url)
+								return CarbonFootprintAudit.audit(transferTraces,url)
 
+								/*
 							case 'GENERAL':
 
 
@@ -177,6 +178,9 @@ export class Commander {
 						}
 					})
 					)
+
+					return promiseArray
+					
 				}
 			
 				
@@ -246,19 +250,6 @@ export class Commander {
 						
 					}
 				}
-				
-				
-					
-					
-					
-				
-						
-				
-					
-						
-						
-					
-					
 				})
 				this._dataLog.completed = true;
 			}

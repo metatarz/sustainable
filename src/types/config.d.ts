@@ -21,11 +21,19 @@ declare global {
 				};
 				REPORT: {
 					scoringWeight: {[key: string]: number};
+					scoring:Scoring
 					format?: string;
 					webhook?: string;
 				};
 			}
 
+			export interface Scoring{
+				[key:string]:{
+				median:number,
+				p10:number,
+				name:string
+				}
+			}
 			export interface EmulatedDevice {
 				name: string;
 				userAgent: string;

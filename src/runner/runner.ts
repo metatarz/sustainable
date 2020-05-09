@@ -100,13 +100,15 @@ export default class Runner{
 		const {page, data: url} = passContextRaw;
 		const _page = await commander.setUp(passContextRaw, projectId, this._cluster);
 		const passContext = {page: _page, data: url}
+		const promisesArray = await commander.asyncEvaluate(passContext)
+		console.log(promisesArray);
+		
 		//@ts-ignore allSettled lacks typescript support
 		const results = await Promise.allSettled([
 			commander.navigate(_page!, url),
-			commander.asyncEvaluate(passContext)
+			...promisesArray!
 			
 		]);
-
 		return 1234
 	}
 	

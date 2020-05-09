@@ -138,6 +138,9 @@ export const DEFAULT: SA.Config.DefaultOptions = {
 			media: 2,
 			transfer: 3
 		},
+		scoring:{
+			CF:{median:11, p10:3, name:'Carbon Footprint'}
+		},
 		format: 'json',
 		webhook: ''
 	}
