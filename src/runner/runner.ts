@@ -4,8 +4,9 @@ import {generate} from '../helpers/uuid-generator';
 import { safeReject } from '../helpers/safeReject';
 import {Queue, Worker, Job, QueueEvents} from 'bullmq'
 import { Cluster } from 'puppeteer-cluster';
+import { DEFAULT } from '../config/configuration';
 
-// Fetched dynamically. New requests url here (must include www)
+
 //protocol error network.getResponseBody no resource with given identifier found with url: https://www.uoc.edu
 
 export default class Runner{
@@ -21,21 +22,24 @@ export default class Runner{
 		this.queueEvents()
 		//crazy workers x3 (not using cluster workers)
 		this.run()
-		this.run()
-		this.run()
 
-
-		
 	}	
 
 
 	async run(){
 		//should work on cluster.queue directly?
 		const worker = new Worker('main', async job =>{
-			await this.main(job)
-			return 12
+			//await this.main(job)
+			try{
+			const {url} = job.data
+			const result = await this._cluster.execute(url, this.handler.bind(this));
+			return result
+			}catch(error){
+				safeReject(error)
+				
+			}
 		
-		})
+		}, {concurrency:DEFAULT.PUPPETEER_OPTIONS.maxConcurrency})
 	}
 
 	//TODO move this to server
@@ -61,30 +65,26 @@ export default class Runner{
 
 	}
 
-	async main(job:Job){
+	async shutdown(){
 
 		try {
-			const cluster = this._cluster
-			if (cluster) {
-				const {url} = job.data
-	
-				
-				cluster.queue(url, this.handler.bind(this));
-				
-				
+				const cluster = this._cluster
 	
 				await cluster.idle();
 				await cluster.close();
+				
 	
 				process.on('unhandledRejection', async (reason, p) => {
 					console.error(reason,p);
 					throw new Error('Unhandled Rejection at Promise');
 				});
 	
-			}
 		} catch (error) {
 			safeReject(error)
 		
+		}
+		finally{
+			process.exit(1)
 		}
 	}
 

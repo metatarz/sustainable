@@ -1,3 +1,4 @@
 node_modules
 *.env
 traces
+notes.txt

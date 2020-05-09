@@ -3,6 +3,7 @@ import validUrl from './helpers/validUrl'
 import {Queue, QueueEvents} from 'bullmq'
 const Redis = require('ioredis')
 import Runner from './runner/runner';
+import { safeReject } from './helpers/safeReject';
 const bodyParser = require('body-parser')
 
 
@@ -10,6 +11,7 @@ export default class App{
 
     _ENV='dev'
     _port:number;
+    _runner:any;
 
     constructor(){
         if(this._ENV==='prod'){
@@ -27,6 +29,8 @@ export default class App{
     async init(){
 
         //launch express server
+
+        try{
         const app = express()
         app.use(bodyParser.urlencoded({extended: true}));
         app.use(bodyParser.json());
@@ -38,12 +42,16 @@ export default class App{
         const queue = new Queue('main', {connection})
 
         //launch runner
-
         const runner=new Runner()
+        this._runner=runner
         await runner.init()
         //launch listeners
         
        this._listeners(app, queue)
+        }
+       catch(error){
+           safeReject(error)
+       }
 
     }
 
@@ -78,6 +86,17 @@ export default class App{
 			    
 			});
 
+         })
+
+         app.get('/service/close', async (req,res)=>{
+             //gracefully close
+             await Promise.all([
+                 queue.close(),
+                  queue.disconnect(),
+                   this._runner.shutdown()
+                ])
+
+             res.sendStatus(200)
          })
         
     }
