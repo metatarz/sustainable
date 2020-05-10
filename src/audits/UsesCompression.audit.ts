@@ -20,7 +20,7 @@ export class UsesCompressionAudit extends Audit{
 
 
     static audit(traces:SA.DataLog.TransferTrace):SA.Audit.Result{
-
+try{
     const urls = new Set()
     const compressionRatio = (compressed:number, uncompressed:number) => Number.isFinite(compressed) && compressed > 0 ?
     (compressed / uncompressed) : 1;
@@ -29,13 +29,13 @@ export class UsesCompressionAudit extends Audit{
     //js files considered secure (with identifiable content on HTTPS) should not be compressed (to avoid CRIME & BREACH attacks)
     const resources = traces.record.filter((record)=>{
         const resourceType = record.request.resourceType
-        const headers = record.response.headers
+        const url = record.response.url
         if(resourceType ==='image') return false
-        if(headers['content-type'] && headers['content-type'].includes('woff')) return false
+        if(url && url.includes('woff')) return false
 
 
         const size = record.CDP.compressedSize.value
-        const unSize = record.response.uncompressedSize.value
+        const unSize = (record.response.uncompressedSize.value>0?record.response.uncompressedSize.value:0)
         const ratio = compressionRatio(size, unSize)
 
         if(ratio <RATIO_THRESHOLD) return false
@@ -68,5 +68,10 @@ export class UsesCompressionAudit extends Audit{
                 }
             }
         }
+    }catch(error){
+        console.log(error);
+        
     }
+    }
+
 }

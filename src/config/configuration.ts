@@ -10,7 +10,7 @@ export const DEFAULT: SA.Config.DefaultOptions = {
 		},
 		perBrowserOptions: undefined,
 		monitor: true,
-		timeout: 40 * 1000,
+		timeout: 90 * 1000,
 		retryLimit: 0,
 		retryDelay: 0,
 		skipDuplicateUrls: false,
@@ -139,7 +139,7 @@ export const DEFAULT: SA.Config.DefaultOptions = {
 			transfer: 0.23076923076923078
 		},
 		scoring:{
-			CF:{median:11, p10:3, name:'Carbon Footprint'}
+			CF:{median:4, p10:1.2, name:'Carbon Footprint'}
 		},
 		format: 'json',
 		webhook: ''

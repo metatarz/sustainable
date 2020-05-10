@@ -8,10 +8,9 @@ export default class CollectTransfer extends Collect {
 			const results: any = [];
 			const protocol:any = []
 			let CDP: any;
-			
 			page._client.on('Network.loadingFinished', (data: any) => {
-				CDP = data;
-				
+					CDP = data;	
+
 			});
 
 			page._client.on('Network.responseReceived',(data:any) => {
@@ -24,19 +23,24 @@ export default class CollectTransfer extends Collect {
 				
 			})
 
-
 			page.on('requestfinished', async (request: any) => {
 				const response = request.response();
+				
 				
 				let responseBody;
 
 				if (request.redirectChain().length === 0) {
-					// Body can only be access for non-redirect responses
+					// Body can only be accessed for non-redirect responses
 					responseBody = await response.buffer();
 					response.uncompressedSize = {
-						value: responseBody.length,
+						value: (responseBody.length?responseBody.length:0),
 						units: 'bytes'
 					};
+				}else{
+					response.uncompressedSize = {
+						value:0,
+						units:'undefined'
+					}
 				}
 
 				//delete circular objects 
@@ -46,13 +50,11 @@ export default class CollectTransfer extends Collect {
 				delete request._client;
 				delete request._frame;
 
-
 				// Console.log(request);
 				// console.log(response);
 
 				// check we are zipping it correctly
-				
-				if (CDP && request._requestId && CDP.requestId === request._requestId) {
+				if (CDP){
 					const information = {
 						request:{
 							requestId:request._requestId,
@@ -80,7 +82,8 @@ export default class CollectTransfer extends Collect {
 							compressedSize:{value:CDP.encodedDataLength, units:'bytes'},
 							shouldReportCorbBlocking:CDP.shouldReportCorbBlocking
 						}
-					};
+					}
+				
 
 					results.push(information);
 				}
@@ -90,15 +93,12 @@ export default class CollectTransfer extends Collect {
 			console.log('waiting for navigation to load');
 
 			await page.waitForNavigation({waitUntil:'networkidle0'});
-
 			results.map((info:any)=>{
 				info.request.protocol = protocol.find((p:any)=>p.reqId === info.request.requestId).protocol
 				return {
 					info
 				}
 			})
-			
-			
 			return {
 				record:results
 			}

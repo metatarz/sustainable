@@ -27,7 +27,7 @@ export class CarbonFootprintAudit extends Audit{
     }
 
     static async audit(traces:any, url:string):Promise<SA.Audit.Result>{
-
+try{
         const getGeoLocation = (ip:string) => {
             //2 letter ISO-3166-1 country code https://www.iban.com/country-codes */
             const country = geoip.lookup(ip)?.country
@@ -98,13 +98,12 @@ export class CarbonFootprintAudit extends Audit{
             }
 
         const records = await getValidRecords();
-        
        const totalTransfersize = sum(records.
-       map((record:any)=>record.size))
+       map((record:any)=>record.size>0?record.size:record.unSize))
 
        const recordsByFileSize = traces.record.reduce((acc,record)=>{
         acc[record.request.resourceType] = (acc[record.request.resourceType] + 
-            (record.CDP.compressedSize.value || record.response.uncompressedSize.value)  || 0)
+            (record.CDP.compressedSize.value>0?record.CDP.compressedSize.value:record.response.uncompressedSize.value)  || 0)
         return acc
     }, {} as Record<string, number>)
 
@@ -156,9 +155,9 @@ export class CarbonFootprintAudit extends Audit{
             scoreDisplayMode:'numeric',
             extendedInfo:{
                 value:{
-                    totalTransfersize,
-                    totalWattage:sum(totalWattage),
-                    metric,
+                    totalTransfersize:[totalTransfersize,'bytes'],
+                    totalWattage:[sum(totalWattage), 'kWh'],
+                    carbonfootprint:[metric, 'gCO2eq / 100 views'],
                     share:recordsByFileSizePercentage
                 }
             }
@@ -166,7 +165,11 @@ export class CarbonFootprintAudit extends Audit{
 
 
         }
+    }catch(error){
+        console.log(error);
+        
     }
     
+}
 }
 

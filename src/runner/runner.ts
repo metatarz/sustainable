@@ -112,7 +112,7 @@ export default class Runner{
 			...promisesArray!
 			
 		]);
-
+		
 		const resultsParsed = Collect.parseAllSettled(results,true)
 
 		const mapResult = resultsParsed[6].map(({value})=>{

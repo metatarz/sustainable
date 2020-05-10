@@ -18,7 +18,7 @@ export class UsesHTTP2Audit extends Audit{
  * @param traces requiredTraces
  */
     static audit(traces:any, url:string):SA.Audit.Result{
-    
+    try{
         const urls = new Set()
         const initialHost = new URL(url).host
         
@@ -45,11 +45,20 @@ export class UsesHTTP2Audit extends Audit{
         return {
             meta:UsesHTTP2Audit.meta,
             score:Number(resources.length === 0),
-            scoreDisplayMode:'binary'
+            scoreDisplayMode:'binary',
+            extendedInfo:{
+                value:{
+                     results:resources   
+                }
+            }
            
         }
-
+    }catch(error){
+        console.log((error));
+        
+    }
 
 
     }
+
 }
