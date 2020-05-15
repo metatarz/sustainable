@@ -40,6 +40,7 @@ export class CollectAssets extends Collect {
 				const scriptSrcs: any[] = []
 				const styles: object[] = [];
 				const scripts: object[] = [];
+				const linkElements : object[] = []
 
 				const isCssStyleTag = (element:any) =>
 					element.tagName === 'STYLE' &&
@@ -113,18 +114,32 @@ export class CollectAssets extends Collect {
 						}
 						
 					})
+
+				Array.from(document.querySelectorAll('link')).forEach((element:any)=>{
+					if(element.href){
+						const attr = getElementAttributes(element)
+						linkElements.push({href:element.href, attr })
+					}
+					
+
+				})
+
+			
 						
 				
-
 				const cssInfo = {styleHrefs, styles};
 				const jsInfo = {scriptSrcs, scripts}
 
-				return {css:cssInfo, js:jsInfo}
+				return {css:cssInfo, js:jsInfo, other:{linkElements}}
 			});
 
 
+			console.log(information.other)
+
+			
+
+
 			return {
-				assets:{
 					css:{
 						info:information.cssInfo,
 						sheets
@@ -133,7 +148,7 @@ export class CollectAssets extends Collect {
 						info:information.jsInfo,
 						scripts
 					}
-				}
+				
 			}
 			/*
 			return [

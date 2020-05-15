@@ -18,13 +18,17 @@ declare global {
         }
 
         export interface Traces{
-            html:string[],
+            html:HtmlTrace[],
             css:CssTrace,
             js:JsTrace,
             transfer:TransferTrace,
             general:GeneralTrace,
             fonts:FontsTrace,
-            media:MediaTrace
+            media:ImageFormat[]
+        }
+
+        export interface HtmlTrace{
+            html:string[]
         }
 
         export interface MediaTrace{
@@ -32,7 +36,7 @@ declare global {
         }
 
         export interface ImageFormat{
-            name:string
+            [key:string]:string
         }
         export interface GeneralTrace{
             console:ConsoleMessage[]
@@ -53,7 +57,7 @@ declare global {
         }
 
         export interface FontsTrace{
-            subfonts:SubfontFormat,
+            fonts:SubfontFormat,
 
         }
 

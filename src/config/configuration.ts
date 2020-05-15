@@ -1,7 +1,7 @@
 export const DEFAULT: SA.Config.DefaultOptions = {
 	PUPPETEER_OPTIONS: {
 		concurrency: 2,
-		maxConcurrency: 4,
+		maxConcurrency: 10,
 		workerCreationDelay: 0,
 		puppeteerOptions: {
 			headless: true,

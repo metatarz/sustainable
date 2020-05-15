@@ -11,18 +11,18 @@ export class UsesHTTP2Audit extends Audit{
             failureTitle:'Dont use HTTP2',
             description:`HTTP2 provides advantages such as:
                              multiplexing, server push, binary headers and increased security.`,
-            requiredTraces:['transfer','record']
-        }
+            scoringType:'transfer'
+        } as SA.Audit.Meta
     }
 /**
  * @param traces requiredTraces
  */
-    static audit(traces:any, url:string):SA.Audit.Result{
+    static audit(traces:SA.DataLog.TransferTrace, url:string):SA.Audit.Result{
     try{
         const urls = new Set()
         const initialHost = new URL(url).host
         
-        const resources = traces.record.filter((record:SA.DataLog.Record)=>{
+        const resources = traces.record.filter((record)=>{
 
             const host = new URL(record.request.url).host
             if(record.response.fromServiceWorker) return false
@@ -44,7 +44,7 @@ export class UsesHTTP2Audit extends Audit{
 
         return {
             meta:UsesHTTP2Audit.meta,
-            score:Number(resources.length === 0),
+            score:Number(urls.size === 0),
             scoreDisplayMode:'binary',
             extendedInfo:{
                 value:{

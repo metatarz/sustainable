@@ -21,6 +21,9 @@ import Collect from './collect';
 import { CarbonFootprintAudit } from '../audits/CarbonFootprint.audit';
 import { UsesCompressionAudit } from '../audits/UsesCompression.audit';
 import { UsesHTTP2Audit } from '../audits/UsesHTTP2.audit';
+import { NoConsoleLogsAudit } from '../audits/NoConsoleLogs.audit';
+import { UsesLazyLoadingAudit } from '../audits/UsesLazyLoading.audit';
+import cheerio from 'cheerio'
 
 
 export class Commander {
@@ -37,23 +40,9 @@ export class Commander {
 			if (options) {
 				this._options = options;
 			}
-			this._dataLog = {
-				uid: pId,
-				 url:url, 
-				 monitor:[], 
-				 completed: false, 
-				 traces:{
-					html:[],
-					css:{info:{styleHrefs:[], styles:[]}},
-					js:{info:{scriptSrcs:[], scripts:[]}},
-					transfer:{record:[],failed:[],redirect:[]},
-					general:{console:[], performance:{perf:<Performance>{},metrics:<SA.DataLog.Metrics>{}}},
-					media:{images:[]},
-					fonts:{subfonts:{}}
-					
 
-			}
-		};
+			
+	
 			this._tracker = createTracker(page)
 			this._cluster = cluster
 			this.systemMonitor(this._startTime,'start')
@@ -109,25 +98,24 @@ export class Commander {
 
 	async asyncEvaluate(passContext: any) {
 		try {
-			// Const this._dataLog = this._this._dataLog.find((_pId)=>_pId.id===pId)
-			// TODO Type DataLo
 			const {page, data:url} = passContext
 					console.log('running tasks…');
 					//@ts-ignore
 					const promiseArray = (Object.keys(this._audits).map(async (k: string) => {
 						switch (k) {
-							/*
+							
 							case 'HTML':
 								 const htmlTraces = await CollectHTML.afterPass(
 									passContext,
 									this._appOptions
 								);
-	
-								return console.log(htmlTraces);
 								
-							*/
+								 return null
+							
 
 							case 'TRANSFER':
+							
+								
 								const transfer = await Promise.allSettled([
 									CollectTransfer.atPass(passContext),
 									CollectFailedTransfers.atPass(passContext),
@@ -141,39 +129,45 @@ export class Commander {
 									CarbonFootprintAudit.audit(transferTraces,url),
 									UsesHTTP2Audit.audit(transferTraces,url)
 								])
+								
 
-								/*
+								
 							case 'GENERAL':
 
-
-			
-								/*
+				
 								const general = await Promise.allSettled([
 									CollectConsole.afterPass(passContext, this._appOptions),
 									CollectPerformance.afterPass(passContext)
 								]);
-
 								const generalTraces = Collect.parseAllSettled(general)
+
+								return NoConsoleLogsAudit.audit(generalTraces)
 								
 							
 								
 							case 'CSS':
-								const assets = await CollectAssets.afterPass(passContext)
-								const assetsTraces = Collect.parseAllSettled(assets)
+							
+								const assets= await CollectAssets.afterPass(passContext)
+								return null
+								
+								
 								
 								
 							case 'FONTS':
+					
 								const fonts = await CollectSubfont.afterPass(
 									passContext
 								);
+
+								return null
 								
-								const fontsTraces = Collect.parseAllSettled(fonts)
+								
 								
 						
-							case 'MEDIA':
-								const media = await CollectImages.afterPass(passContext)
-								const mediaTraces = Collect.parseAllSettled(media)
-								*/
+							case 'MEDIA':;
+								const mediaTraces = await CollectImages.afterPass(passContext)
+								return UsesLazyLoadingAudit.audit(mediaTraces.media)
+
 							default:
 								break;
 						}

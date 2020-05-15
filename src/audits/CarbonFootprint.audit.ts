@@ -14,6 +14,7 @@ import { sum } from "../bin/statistics";
 const GREEN_SERVER_API = 'http://api.thegreenwebfoundation.org/greencheck'
 const MB_TO_BYTES = 1024 * 1024
 const GB_TO_MB = 1024
+
 export class CarbonFootprintAudit extends Audit{
     static get meta(){
 
@@ -22,11 +23,11 @@ export class CarbonFootprintAudit extends Audit{
             title:'',
             failureTitle:'',
             description:'',
-            requiredTraces:['transfer']
-        }
+            scoringType:'transfer'
+        } as SA.Audit.Meta
     }
 
-    static async audit(traces:any, url:string):Promise<SA.Audit.Result>{
+    static async audit(traces:SA.DataLog.TransferTrace, url:string):Promise<SA.Audit.Result>{
 try{
         const getGeoLocation = (ip:string) => {
             //2 letter ISO-3166-1 country code https://www.iban.com/country-codes */
@@ -53,8 +54,8 @@ try{
             }
             
           
-        const isGreenServerMem = memoize(isGreenServer, {async:true, maxAge:4000})
-        const getGeoLocationMem = memoize(getGeoLocation, {maxAge:4000})
+        const isGreenServerMem = memoize(isGreenServer, {async:true})
+        const getGeoLocationMem = memoize(getGeoLocation)
 
         const getValidRecords = async () => {
                 
@@ -167,6 +168,7 @@ try{
         }
     }catch(error){
         console.log(error);
+        
         
     }
     

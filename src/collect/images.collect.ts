@@ -5,7 +5,7 @@ export class CollectImages extends Collect{
         const {page} = passContext
 
         
-        await page.waitForNavigation()
+        await page.waitForNavigation({waitUntil:'networkidle0'});
         const information = await page.evaluate(()=>{
             return Array.from(document.body.querySelectorAll('img')).map(img => {
                 const attrObj:any = {}
