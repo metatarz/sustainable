@@ -34,6 +34,12 @@ export default class App{
         const app = express()
         app.use(bodyParser.urlencoded({extended: true}));
         app.use(bodyParser.json());
+        app.use((_,res,next)=>{
+            res.setHeader('Access-Control-Allow-Origin', 'http://localhost:4200')
+            res.setHeader('Access-Control-Allow-Headers', 'content-type')
+            res.setHeader('Access-Control-Allow-Methods', 'POST')
+            next()
+        })
         app.listen(this._port, 'localhost', ()=> console.log('Server running on port :', this._port))
 
         //launch redis server
@@ -64,6 +70,8 @@ export default class App{
         })
         app.post('/service/add', async (req,res) => {
             const {url} = req.body
+            console.log(url);
+            
             if(!validUrl(url)){
                 return res.status(400).send({status:'error'})
             }

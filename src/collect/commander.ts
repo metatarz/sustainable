@@ -45,7 +45,7 @@ export class Commander {
 	
 			this._tracker = createTracker(page)
 			this._cluster = cluster
-			this.systemMonitor(this._startTime,'start')
+			//this.systemMonitor(this._startTime,'start')
 
 			// Customable
 			// page.setJavaScriptEnabled(false); Speeds up process drastically
