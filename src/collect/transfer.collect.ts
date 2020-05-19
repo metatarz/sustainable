@@ -42,14 +42,6 @@ export default class CollectTransfer extends Collect {
 						units:'undefined'
 					}
 				}
-
-				//delete circular objects 
-				delete request._response;
-				delete response._request;
-				delete response._client;
-				delete request._client;
-				delete request._frame;
-
 				// Console.log(request);
 				// console.log(response);
 

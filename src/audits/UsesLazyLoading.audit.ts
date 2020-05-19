@@ -15,20 +15,18 @@ export class UsesLazyLoadingAudit  extends Audit{
     }
 
 
-    static audit(traces:SA.DataLog.ImageFormat[]){
+    static audit(traces:SA.DataLog.MediaTrace):SA.Audit.Result{
 
         const urls = new Set()
-            traces.filter((img)=>{
+            traces.images.filter((img)=>{
             const imgAttr = Object.keys(img)
             //search for 'lazy' word inclusion in class attr
-            if(imgAttr && imgAttr.includes('class')){
-                return !(/lazy/.test(img['class'])) 
+    
+           if(imgAttr && imgAttr.includes('src')){
+               const imageSrc = img.src
+               return !(traces.lazyImages.includes(imageSrc))
+           }
 
-            }
-            //search for loading attr and value lazy
-            if(imgAttr && imgAttr.includes('loading')){
-                return !((/lazy/.test(img['loading'])))
-            }
         }).map(img=>{
             if(img && img.src){
                 const rawSrc = img.src
@@ -49,11 +47,17 @@ export class UsesLazyLoadingAudit  extends Audit{
             
         })
 
+        
 
         return {
                 meta:UsesLazyLoadingAudit.meta,
-                score:Number(urls.size===0),
-                scoreDisplayMode:'binary'
+                score:Number(traces.lazyImages.length>0),
+                scoreDisplayMode:'binary',
+                extendedInfo:{
+                    value:{
+                        nonLazyImages:urls.entries
+                    }
+                }
             
         }
     }

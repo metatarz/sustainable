@@ -134,7 +134,7 @@ export class CollectAssets extends Collect {
 			});
 
 
-			console.log(information.other)
+
 
 			
 

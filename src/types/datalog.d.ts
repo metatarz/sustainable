@@ -24,7 +24,7 @@ declare global {
             transfer:TransferTrace,
             general:GeneralTrace,
             fonts:FontsTrace,
-            media:ImageFormat[]
+            media:MediaTrace
         }
 
         export interface HtmlTrace{
@@ -33,6 +33,7 @@ declare global {
 
         export interface MediaTrace{
             images:ImageFormat[]
+            lazyImages:string[]
         }
 
         export interface ImageFormat{
