@@ -84,7 +84,7 @@ export default class App{
 
             queueEvents.on('completed', ({ jobId, returnvalue }) => {
                 if(_jobId ===jobId){
-                    res.status(200).send({result:returnvalue})
+                    res.status(200).send({...returnvalue})
                 }
             });
             queueEvents.on('failed', ({ jobId, failedReason }) => {

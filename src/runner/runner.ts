@@ -31,9 +31,7 @@ export default class Runner{
 
 
 	async run(){
-		//should work on cluster.queue directly?
 		const worker = new Worker('main', async job =>{
-			//await this.main(job)
 			try{
 			const {url} = job.data
 			const result = await this._cluster.execute(url, this.handler.bind(this));
@@ -100,7 +98,7 @@ export default class Runner{
 		const commander = new Commander()
 		// Mock project Id
 		const projectId = generate();
-		const {page, data: url} = passContextRaw;
+		const {_, data: url} = passContextRaw;
 		const _page = await commander.setUp(passContextRaw, projectId, this._cluster);
 		const passContext = {page: _page, data: url}
 		const promisesArray = await commander.asyncEvaluate(passContext)
