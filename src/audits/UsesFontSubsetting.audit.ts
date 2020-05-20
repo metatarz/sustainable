@@ -1,4 +1,4 @@
-import Audit from "../audits/audit";
+import Audit from "./audit";
 
 
 const LOCAL_FONTS= [

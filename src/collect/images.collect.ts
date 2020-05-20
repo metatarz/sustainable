@@ -4,9 +4,7 @@ export class CollectImages extends Collect{
     static async afterPass(passContext:any){
         const {page} = passContext;
         const lazyImages:string[] = []
-        
-       
-        
+
         await page.waitForNavigation({waitUntil:'load'});
 
         const fetchImages = async ()=> {
@@ -44,18 +42,13 @@ export class CollectImages extends Collect{
                   resolve();
                 }, 10);
               }));   
-        console.log('total', images.length);
-        console.log('lazy', lazyImages.length)
-        
-        
-        
+
         const information = {
             images,
             lazyImages
 
         }
 
-        
         return {
             media:information
         }

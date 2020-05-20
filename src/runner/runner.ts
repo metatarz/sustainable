@@ -8,6 +8,7 @@ import { DEFAULT } from '../config/configuration';
 import Collect from '../collect/collect';
 import Audit from '../audits/audit';
 import { performance } from '../helpers/now';
+import { groupBy, sum } from '../bin/statistics';
 
 
 //protocol error network.getResponseBody no resource with given identifier found with url: https://www.uoc.edu
@@ -99,8 +100,6 @@ export default class Runner{
 		const commander = new Commander()
 		// Mock project Id
 		const projectId = generate();
-		//important! Place it inside the handler (1 url, 1 commander instance)
-		
 		const {page, data: url} = passContextRaw;
 		const _page = await commander.setUp(passContextRaw, projectId, this._cluster);
 		const passContext = {page: _page, data: url}
@@ -116,23 +115,19 @@ export default class Runner{
 		const resultsParsed = Collect.parseAllSettled(results, true)
 
 		const globalScore = Audit.computeScore(resultsParsed)
-		
 
+		const audits = Audit.groupAudits(resultsParsed)
 
 		const meta = {
 			id:projectId,
 			url:url,
 			timing:[startTime, Date.now()]
 		}
-
 		return {
 			globalScore,
 			meta,
-			audits:resultsParsed
-
+			audits
 		}
-
-		//const globalScore = Audit.computeScore()
 	}
 	
 }

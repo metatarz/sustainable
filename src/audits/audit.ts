@@ -1,4 +1,4 @@
-import { getLogNormalScore, sum } from './../bin/statistics'
+import { getLogNormalScore, sum, groupBy } from './../bin/statistics'
 import { DEFAULT } from '../config/configuration';
 
 export default class Audit{
@@ -57,6 +57,25 @@ try{
    console.log(error);
    
 }
+   }
+
+   static groupAudits(list:Array<any>){
+      const resultsGrouped = groupBy(list, (audit:any)=>audit.meta.scoringType)
+   
+      const audits = Array.from(resultsGrouped.keys()).map(key=>{
+
+         const groupByKey = resultsGrouped.get(key)
+         const auditScoreRaw = sum(groupByKey.map((result:any)=>result.score))/groupByKey.length
+         const auditScore = Math.round(auditScoreRaw*100)
+
+         return {
+            category:key,
+            score:auditScore,
+            audits:groupByKey
+         }
+      })
+
+      return audits
    }
 
 

@@ -164,7 +164,7 @@ export class Commander {
 								
 								
 						
-							case 'MEDIA':;
+							case 'MEDIA':
 								const mediaTraces = await CollectImages.afterPass(passContext)
 								return UsesLazyLoadingAudit.audit(mediaTraces.media)
 

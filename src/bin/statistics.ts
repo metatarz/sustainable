@@ -70,4 +70,19 @@ function erf(x:number) {
   export function sum(array:Array<number>){
       return array.reduce((total:number, actual:number)=>total+actual)
   }
+
+  export function groupBy(list:Array<any>, keyGetter:CallableFunction) {
+    const map = new Map();
+    list.forEach((item) => {
+         const key = keyGetter(item);
+         const collection = map.get(key);
+         if (!collection) {
+             map.set(key, [item]);
+         } else {
+             collection.push(item);
+         }
+    });
+    return map;
+}
+
   
