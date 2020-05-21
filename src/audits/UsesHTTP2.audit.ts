@@ -11,6 +11,7 @@ export class UsesHTTP2Audit extends Audit{
             failureTitle:'Dont use HTTP2',
             description:`HTTP2 provides advantages such as:
                              multiplexing, server push, binary headers and increased security.`,
+                             category:'server',
             scoringType:'transfer'
         } as SA.Audit.Meta
     }

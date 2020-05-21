@@ -7,6 +7,7 @@ export class NoConsoleLogsAudit extends Audit{
             title:'Doesnt have console logs',
             failureTitle:'Has console logs',
             description:`It is important to keep the console log clean of error, warning or info outputs.`,
+            category:'design',
             scoringType:'server'
         } as SA.Audit.Meta
 

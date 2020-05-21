@@ -60,7 +60,7 @@ try{
    }
 
    static groupAudits(list:Array<any>){
-      const resultsGrouped = groupBy(list, (audit:any)=>audit.meta.scoringType)
+      const resultsGrouped = groupBy(list, (audit:any)=>audit.meta.category)
    
       const audits = Array.from(resultsGrouped.keys()).map(key=>{
 

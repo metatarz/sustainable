@@ -16,6 +16,7 @@ export class UsesFontSubsettingAudit extends Audit{
             title:'Uses font subsetting',
             failureTitle:'Doesnt use font subsetting',
             description:`Font subsetting is a method to only download the character sets of use. `,
+            category:'design',
             scoringType:'fonts'
         } as SA.Audit.Meta
     }

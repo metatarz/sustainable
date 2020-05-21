@@ -14,6 +14,7 @@ export class UsesCompressionAudit extends Audit{
             title:'Use compression',
             failureTitle:'Dont use compression',
             description:`Compression is important because it reduce the total amount of data transferred to clients`,
+            category:'server',
             scoringType: 'transfer'
         }
     }

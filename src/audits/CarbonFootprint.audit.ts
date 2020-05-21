@@ -23,6 +23,7 @@ export class CarbonFootprintAudit extends Audit{
             title:'',
             failureTitle:'',
             description:'',
+            category:'server',
             scoringType:'transfer'
         } as SA.Audit.Meta
     }
@@ -103,8 +104,9 @@ try{
        map((record:any)=>record.size>0?record.size:record.unSize))
 
        const recordsByFileSize = traces.record.reduce((acc,record)=>{
-        acc[record.request.resourceType] = (acc[record.request.resourceType] + 
-            (record.CDP.compressedSize.value>0?record.CDP.compressedSize.value:record.response.uncompressedSize.value)  || 0)
+        acc[record.request.resourceType] = (acc[record.request.resourceType])? acc[record.request.resourceType] +=
+            (record.CDP.compressedSize.value>0?record.CDP.compressedSize.value:record.response.uncompressedSize.value):
+            (record.CDP.compressedSize.value>0?record.CDP.compressedSize.value:record.response.uncompressedSize.value) 
         return acc
     }, {} as Record<string, number>)
 

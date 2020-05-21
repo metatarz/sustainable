@@ -11,6 +11,8 @@ declare global{
             failureTitle:string,
             /** Audit description, showcasinng importance and useful information */
             description:string,
+            /** Audit category: Server or Design */
+            category:"server" | "design",
             /** Traces names this audit requires */
             scoringType:ScoreWeights,
 
