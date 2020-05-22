@@ -45,11 +45,27 @@ try{
 
 
     }).map((record)=>{
-        const url = record.request.url
-        const resourceType = record.request.resourceType
+        const url = new URL(record.request.url)
 
+        let path = ''
+        let searchParams
+
+        if(url.pathname){
+            path=url.pathname
+
+            if(path.length>30){
+                path = path.substring(0, path.indexOf('/',2))
+            }
+        }
+
+
+        
+        const trimUrl = url.hostname + path
+        
+        const resourceType = record.request.resourceType
+        
         return{
-            url,
+            url:trimUrl,
             resourceType
         }
     }).

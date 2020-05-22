@@ -14,16 +14,23 @@ export class NoConsoleLogsAudit extends Audit{
     }
         static audit(traces:SA.DataLog.GeneralTrace):SA.Audit.Result{
             
-            const resources = traces.console
-            const score = Number(resources.length===0)
+            const dups = new Set()
+            const uniqueResources = traces.console.filter(trace=>{
+                const dup = dups.has(trace.text)
+                dups.add(trace.text)
+                return !dup
+            })
+            const score = Number(uniqueResources.length===0)
             const meta = Audit.successOrFailureMeta(NoConsoleLogsAudit.meta, score)
+            
+            
             return {
                 meta,
                 score:score,
                 scoreDisplayMode:'binary',
                 extendedInfo:{
                     value:{
-                        results:resources
+                        results:uniqueResources
                     }
                 }
             }
