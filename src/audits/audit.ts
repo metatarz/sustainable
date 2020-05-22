@@ -9,8 +9,8 @@ export default class Audit{
 
    static audit(traces:SA.DataLog.TransferTrace | SA.DataLog.GeneralTrace | 
       SA.DataLog.MediaTrace | SA.DataLog.FontsTrace | SA.DataLog.CssTrace | SA.DataLog.JsTrace |
-      SA.DataLog.HtmlTrace, url?:string):Promise<SA.Audit.Result> | SA.Audit.Result{
-    return {} as SA.Audit.Result
+      SA.DataLog.HtmlTrace, url?:string):Promise<SA.Audit.Result | undefined> | SA.Audit.Result | undefined{
+    return {} as SA.Audit.Result 
    }
    /**
     * Credits to Google Lighthouse
@@ -62,20 +62,33 @@ try{
    static groupAudits(list:Array<any>){
       const resultsGrouped = groupBy(list, (audit:any)=>audit.meta.category)
    
-      const audits = Array.from(resultsGrouped.keys()).map(key=>{
+      const audits = Array.from(resultsGrouped.keys()).map((key:'server'|'design')=>{
 
          const groupByKey = resultsGrouped.get(key)
          const auditScoreRaw = sum(groupByKey.map((result:any)=>result.score))/groupByKey.length
          const auditScore = Math.round(auditScoreRaw*100)
+         const catDescription = DEFAULT.CATEGORIES[key].description
 
          return {
-            category:key,
+            category:{name:key, description:catDescription},
             score:auditScore,
             audits:groupByKey
          }
       })
 
       return audits
+   }
+
+   static successOrFailureMeta(meta:SA.Audit.Meta, score:number){
+
+      const {title, failureTitle, ...output} = meta
+      
+      if(score===0 || score <=0.49){
+         return {title:failureTitle, ...output}
+      }else{
+         return {title, ...output}
+      }
+
    }
 
 

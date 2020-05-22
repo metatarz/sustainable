@@ -16,24 +16,24 @@ export class UsesCompressionAudit extends Audit{
             description:`Compression is important because it reduce the total amount of data transferred to clients`,
             category:'server',
             scoringType: 'transfer'
-        }
+        } as SA.Audit.Meta
     }
 
 
-    static audit(traces:SA.DataLog.TransferTrace):SA.Audit.Result{
+    static audit(traces:SA.DataLog.TransferTrace):SA.Audit.Result|undefined{
 try{
     const urls = new Set()
     const compressionRatio = (compressed:number, uncompressed:number) => Number.isFinite(compressed) && compressed > 0 ?
     (compressed / uncompressed) : 1;
 
     //filter images and woff font formats.
-    //js files considered secure (with identifiable content on HTTPS) should not be compressed (to avoid CRIME & BREACH attacks)
+    //js files considered secure (with identifiable content on HTTPS, e.g personal cookies ) should not be compressed (to avoid CRIME & BREACH attacks)
     const resources = traces.record.filter((record)=>{
         const resourceType = record.request.resourceType
         const url = record.response.url
         if(resourceType ==='image') return false
         if(url && url.includes('woff')) return false
-
+        
 
         const size = record.CDP.compressedSize.value
         const unSize = (record.response.uncompressedSize.value>0?record.response.uncompressedSize.value:0)
@@ -59,9 +59,12 @@ try{
         return true
     }))
 
+    const score = Number(resources.length === 0)
+    const meta = Audit.successOrFailureMeta(UsesCompressionAudit.meta, score)
+
         return {
-            meta:UsesCompressionAudit.meta,
-            score:Number(resources.length === 0),
+            meta:meta,
+            score:score,
             scoreDisplayMode:'binary',
             extendedInfo: {
                 value:{

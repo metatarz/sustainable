@@ -48,11 +48,14 @@ export class UsesLazyLoadingAudit  extends Audit{
             
         })
 
+        const score = Number(traces.lazyImages.length>0)
+        const meta = Audit.successOrFailureMeta(UsesLazyLoadingAudit.meta, score)
+
         
 
         return {
-                meta:UsesLazyLoadingAudit.meta,
-                score:Number(traces.lazyImages.length>0),
+                meta,
+                score,
                 scoreDisplayMode:'binary',
                 extendedInfo:{
                     value:{

@@ -69,11 +69,12 @@ export default class App{
             res.sendStatus(200)
         })
         app.post('/service/add', async (req,res) => {
-            const {url} = req.body
-            console.log(url);
-            
+            let {url} = req.body
             if(!validUrl(url)){
                 return res.status(400).send({status:'error'})
+            }
+            if(!url.startsWith('http')){
+                url='https://'+url
             }
             const job = await queue.add('audit', {
                 url:url

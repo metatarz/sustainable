@@ -18,7 +18,7 @@ export class UsesHTTP2Audit extends Audit{
 /**
  * @param traces requiredTraces
  */
-    static audit(traces:SA.DataLog.TransferTrace, url:string):SA.Audit.Result{
+    static audit(traces:SA.DataLog.TransferTrace, url:string):SA.Audit.Result | undefined{
     try{
         const urls = new Set()
         const initialHost = new URL(url).host
@@ -43,9 +43,11 @@ export class UsesHTTP2Audit extends Audit{
             return true
         })
 
+        const score = Number(urls.size === 0)
+        const meta = Audit.successOrFailureMeta(UsesHTTP2Audit.meta, score)
         return {
-            meta:UsesHTTP2Audit.meta,
-            score:Number(urls.size === 0),
+            meta,
+            score,
             scoreDisplayMode:'binary',
             extendedInfo:{
                 value:{

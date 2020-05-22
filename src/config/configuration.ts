@@ -75,7 +75,10 @@ export const DEFAULT: SA.Config.DefaultOptions = {
 			}
 		]
 	},
-
+	CATEGORIES: {
+		server:{description:'Server aspects which are essential for online sustainability: green hosting, carbon footprint, data transfer.'},
+		design:{description:'Hands-on the website assets that convert code to user-friendly content: images, css stylesheets, scripts, fonts.'}
+	},
 	AUDITS: {
 		JS: [
 			'minification',

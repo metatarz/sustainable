@@ -28,7 +28,7 @@ export class CarbonFootprintAudit extends Audit{
         } as SA.Audit.Meta
     }
 
-    static async audit(traces:SA.DataLog.TransferTrace, url:string):Promise<SA.Audit.Result>{
+    static async audit(traces:SA.DataLog.TransferTrace, url:string):Promise<SA.Audit.Result| undefined>{
 try{
         const getGeoLocation = (ip:string) => {
             //2 letter ISO-3166-1 country code https://www.iban.com/country-codes */
@@ -150,11 +150,11 @@ try{
         const {median, p10} = DEFAULT.REPORT.scoring.CF
 
         const score = Audit.computeLogNormalScore({median, p10}, metric)   
-        
+        const meta = Audit.successOrFailureMeta(CarbonFootprintAudit.meta, score)
 
         return {
-            meta:CarbonFootprintAudit.meta,
-            score:score,
+            meta,
+            score,
             scoreDisplayMode:'numeric',
             extendedInfo:{
                 value:{

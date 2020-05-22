@@ -15,9 +15,11 @@ export class NoConsoleLogsAudit extends Audit{
         static audit(traces:SA.DataLog.GeneralTrace):SA.Audit.Result{
             
             const resources = traces.console
+            const score = Number(resources.length===0)
+            const meta = Audit.successOrFailureMeta(NoConsoleLogsAudit.meta, score)
             return {
-                meta:NoConsoleLogsAudit.meta,
-                score:Number(resources.length===0),
+                meta,
+                score:score,
                 scoreDisplayMode:'binary',
                 extendedInfo:{
                     value:{

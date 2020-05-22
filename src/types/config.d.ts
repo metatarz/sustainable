@@ -9,6 +9,10 @@ declare global {
 					emulatedDevices: EmulatedDevice[];
 					locations: EmulatedLocation[];
 				};
+				CATEGORIES:{
+					server:{description:string},
+					design:{description:string}
+				} 
 				AUDITS: {
 					JS: string[];
 					CSS: string[];

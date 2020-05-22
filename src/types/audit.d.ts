@@ -6,9 +6,9 @@ declare global{
            
             id:string,
              /** short successful audit title */
-            title:string,
+            title?:string,
             /** short failed audit title */
-            failureTitle:string,
+            failureTitle?:string,
             /** Audit description, showcasinng importance and useful information */
             description:string,
             /** Audit category: Server or Design */
