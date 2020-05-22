@@ -1,5 +1,5 @@
 import express = require('express')
-import validUrl from './helpers/validUrl'
+import {urlIsValid, headTestPassed} from './helpers/validUrl'
 import {Queue, QueueEvents} from 'bullmq'
 const Redis = require('ioredis')
 import Runner from './runner/runner';
@@ -70,12 +70,16 @@ export default class App{
         })
         app.post('/service/add', async (req,res) => {
             let {url} = req.body
-            if(!validUrl(url)){
-                return res.status(400).send({status:'error'})
+            if(!urlIsValid(url)){
+                return res.status(400).send({status:'Error invalid URL'})
             }
             if(!url.startsWith('http')){
                 url='https://'+url
             }
+
+            if(await headTestPassed(url)){
+
+            
             const job = await queue.add('audit', {
                 url:url
             })
@@ -93,7 +97,10 @@ export default class App{
                     res.send(500).json(failedReason)
                 }
 			    
-			});
+            });
+        }else{
+            return res.status(400).send({status:'Error unknown URL'})
+        }
 
          })
 

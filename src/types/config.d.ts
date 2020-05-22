@@ -6,6 +6,7 @@ declare global {
 			export interface DefaultOptions {
 				PUPPETEER_OPTIONS: ClusterOptions;
 				CONNECTION_OPTIONS: {
+					maxThrottle:number,
 					emulatedDevices: EmulatedDevice[];
 					locations: EmulatedLocation[];
 				};
