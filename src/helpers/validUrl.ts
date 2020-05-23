@@ -17,7 +17,8 @@ export function urlIsValid(url:string){
 }
 
 /**
- * This function makes HTTP HEAD request to url to see if it is reachable and prevents slow network issues
+ * This function makes HTTP HEAD request to url to see if it is 
+ * reachable and prevents slow network issues
  * @param url string
  */
 
