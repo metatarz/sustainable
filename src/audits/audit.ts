@@ -65,14 +65,16 @@ try{
       const audits = Array.from(resultsGrouped.keys()).map((key:'server'|'design')=>{
 
          const groupByKey = resultsGrouped.get(key)
+         
          const auditScoreRaw = sum(groupByKey.map((result:any)=>result.score))/groupByKey.length
          const auditScore = Math.round(auditScoreRaw*100)
          const catDescription = DEFAULT.CATEGORIES[key].description
+         const auditsByPassOrFail = Audit.successOrFailureAudits(groupByKey)
 
          return {
             category:{name:key, description:catDescription},
             score:auditScore,
-            audits:groupByKey
+            audits:auditsByPassOrFail
          }
       })
 
@@ -83,13 +85,31 @@ try{
 
       const {title, failureTitle, ...output} = meta
       
-      if(score===0 || score <=0.49){
+      if(Audit.failed(score)){
          return {title:failureTitle, ...output}
-      }else{
-         return {title, ...output}
       }
+      return {title, ...output}
 
    }
+
+   static failed(score:number){
+      if(score===0 || score <= 0.49){
+         return true
+      }
+
+      return false
+   }
+
+   static successOrFailureAudits(audits:SA.Audit.Result[]){
+
+      const out =  audits.reduce((obj, v)=>{
+         (Audit.failed(v.score!) ? obj.fail : obj.pass).push(v)
+         return obj
+      }, {pass:[], fail:[]} as Record<string,SA.Audit.Result[]>)
+
+      return out
+   }
+
 
 
 }

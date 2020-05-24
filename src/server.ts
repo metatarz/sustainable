@@ -4,7 +4,6 @@ import {Queue, QueueEvents} from 'bullmq'
 const Redis = require('ioredis')
 import Runner from './runner/runner';
 import { safeReject } from './helpers/safeReject';
-import { type } from 'os';
 const bodyParser = require('body-parser')
 
 
@@ -71,6 +70,7 @@ export default class App{
         })
         app.post('/service/add', async (req,res) => {
             let {url} = req.body
+            url=url.trim()
             
             if(typeof url !== 'string' || !urlIsValid(url)){
                 return res.status(400).send({status:'Error invalid URL'})
