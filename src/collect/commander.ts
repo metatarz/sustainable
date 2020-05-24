@@ -23,7 +23,7 @@ import { UsesCompressionAudit } from '../audits/UsesCompression.audit';
 import { UsesHTTP2Audit } from '../audits/UsesHTTP2.audit';
 import { NoConsoleLogsAudit } from '../audits/NoConsoleLogs.audit';
 import { UsesLazyLoadingAudit } from '../audits/UsesLazyLoading.audit';
-import cheerio from 'cheerio'
+import {UsesGreenServerAudit } from '../audits/UsesGreenServer.audit';
 
 
 export class Commander {
@@ -126,8 +126,9 @@ export class Commander {
 								
 								return Promise.allSettled([
 									UsesCompressionAudit.audit(transferTraces),
-									CarbonFootprintAudit.audit(transferTraces,url),
-									UsesHTTP2Audit.audit(transferTraces,url)
+									CarbonFootprintAudit.audit(transferTraces),
+									UsesHTTP2Audit.audit(transferTraces,url),
+									UsesGreenServerAudit.audit(transferTraces,url)
 								])
 								
 

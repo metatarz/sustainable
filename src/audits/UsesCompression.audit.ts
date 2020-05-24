@@ -12,7 +12,7 @@ export class UsesCompressionAudit extends Audit{
         return {
             id:'usescompression',
             title:'Use compression',
-            failureTitle:'Dont use compression',
+            failureTitle:`Don't use compression`,
             description:`Compression is important because it reduce the total amount of data transferred to clients`,
             category:'server',
             scoringType: 'transfer'
@@ -84,7 +84,7 @@ try{
             scoreDisplayMode:'binary',
             extendedInfo: {
                 value:{
-                    results:resources
+                    resources
                 }
             }
         }

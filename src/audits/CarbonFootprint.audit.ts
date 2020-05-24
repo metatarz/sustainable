@@ -1,17 +1,17 @@
 import Audit from "./audit";
 import geoip from 'geoip-lite';
 import memoize from 'memoizee';
-import fetch from 'node-fetch'
 import { variables } from "../references/references";
 import { DEFAULT } from "../config/configuration";
 import { sum } from "../bin/statistics";
+import { isGreenServerMem } from "../helpers/isGreenServer";
 
 /**
  * @fileoverview Compute gCO2eq considering server location, 
  *                  server greenness per individual resource.
  */
 
-const GREEN_SERVER_API = 'http://api.thegreenwebfoundation.org/greencheck'
+
 const MB_TO_BYTES = 1024 * 1024
 const GB_TO_MB = 1024
 
@@ -20,15 +20,15 @@ export class CarbonFootprintAudit extends Audit{
 
         return {
             id:'carbonfootprint',
-            title:'',
-            failureTitle:'',
-            description:'',
+            title:`Website's carbon footprint is moderate`,
+            failureTitle:`Website's carbon footprint is high`,
+            description:`The carbon footprint is the total amount of greenhouse gases released into the atmosphere to directly and indirectly support a particular activity. Keeping it as low as possible it's key to prevent the climate change.`,
             category:'server',
             scoringType:'transfer'
         } as SA.Audit.Meta
     }
 
-    static async audit(traces:SA.DataLog.TransferTrace, url:string):Promise<SA.Audit.Result| undefined>{
+    static async audit(traces:SA.DataLog.TransferTrace):Promise<SA.Audit.Result| undefined>{
 try{
         const getGeoLocation = (ip:string) => {
             //2 letter ISO-3166-1 country code https://www.iban.com/country-codes */
@@ -42,20 +42,6 @@ try{
                 
             }
 
-        const isGreenServer = async (ip:string)  =>  {
-            try{   
-            const url = `${GREEN_SERVER_API}/${ip}`
-            const response = await (await fetch(url)).json()
-            
-            return response.green
-            }catch(error){
-                console.error(error);
-                
-            }
-            }
-            
-          
-        const isGreenServerMem = memoize(isGreenServer, {async:true})
         const getGeoLocationMem = memoize(getGeoLocation)
 
         const getValidRecords = async () => {
@@ -63,7 +49,7 @@ try{
                 const getGreenRecord =  async () => {
                     const pArray = traces.record.map(async record =>{
                         const isGreen = await isGreenServerMem(record.response.remoteAddress.ip)
-                        return isGreen
+                        return isGreen.green
                     })
                     const isGreen = await Promise.all(pArray)
                     return traces.record.map((record,index)=>{

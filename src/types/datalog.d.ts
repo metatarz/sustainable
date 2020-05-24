@@ -197,7 +197,7 @@ declare global {
         }
         export interface HostAddress{
             ip:string,
-            host:number
+            port:number
         }
 
         export interface CDPData{

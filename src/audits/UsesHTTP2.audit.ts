@@ -8,7 +8,7 @@ export class UsesHTTP2Audit extends Audit{
         return {
             id:'useshttp2',
             title:'Use HTTP2',
-            failureTitle:'Dont use HTTP2',
+            failureTitle:`Don't use HTTP2`,
             description:`HTTP2 provides advantages such as:
                              multiplexing, server push, binary headers and increased security.`,
                              category:'server',
@@ -51,7 +51,7 @@ export class UsesHTTP2Audit extends Audit{
             scoreDisplayMode:'binary',
             extendedInfo:{
                 value:{
-                     results:resources   
+                    resources   
                 }
             }
            
