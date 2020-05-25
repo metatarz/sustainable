@@ -24,6 +24,7 @@ import { UsesHTTP2Audit } from '../audits/UsesHTTP2.audit';
 import { NoConsoleLogsAudit } from '../audits/NoConsoleLogs.audit';
 import { UsesLazyLoadingAudit } from '../audits/UsesLazyLoading.audit';
 import {UsesGreenServerAudit } from '../audits/UsesGreenServer.audit';
+import { UsesFontSubsettingAudit } from '../audits/UsesFontSubsetting.audit';
 
 
 export class Commander {
@@ -144,27 +145,17 @@ export class Commander {
 
 								return NoConsoleLogsAudit.audit(generalTraces)
 								
-							
-								
-							case 'CSS':
-							
-								const assets= await CollectAssets.afterPass(passContext)
-								return null
-								
-								
-								
 								
 							case 'FONTS':
 					
-								const fonts = await CollectSubfont.afterPass(
-									passContext
-								);
-
-								return null
+								const cssPlusFonts= await Promise.allSettled([
+									CollectSubfont.afterPass(passContext),
+									CollectAssets.afterPass(passContext)
+								])
+								const cssPlusFontsTraces = Collect.parseAllSettled(cssPlusFonts)
 								
-								
-								
-						
+								return UsesFontSubsettingAudit.audit(cssPlusFontsTraces)
+							
 							case 'MEDIA':
 								const mediaTraces = await CollectImages.afterPass(passContext)
 								return UsesLazyLoadingAudit.audit(mediaTraces.media)
@@ -209,44 +200,6 @@ export class Commander {
 		
 	}
 	}
-
-	async updateDataLog(data){
-
-		await this.systemMonitor(this._startTime,'run')
-		data.map(result=>{
-			if(result.status === 'fulfilled' && result.value){
-				const keys = Object.keys(result.value)
-				if(!Array.isArray(result.value)){
-
-						keys.forEach(key =>{
-							//@ts-ignore
-							this._dataLog.traces[key] = {...result.value[key]}
-						})
-					}else{
-						console.log(result.value.map((a)=>{
-							return {
-								...a.result
-							}
-							
-							
-							//a.concat(b.result)))
-						}))
-						
-
-						
-					}
-				}
-				})
-				this._dataLog.completed = true;
-			}
-			
-		
-		
-	
-
-	
-
-
 
 
 	/**

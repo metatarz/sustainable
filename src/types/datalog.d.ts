@@ -98,7 +98,13 @@ declare global {
     
 
         export interface CssTrace{
+            sheets:Sheets
             info:StyleInfo
+        }
+
+        export interface Sheets{
+            url:string,
+            text:string
         }
 
         export interface StyleInfo{

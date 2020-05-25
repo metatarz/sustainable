@@ -1,6 +1,8 @@
 import Collect from './collect';
 
 export class CollectAssets extends Collect {
+
+	
 	static async afterPass(passContext: any, options?: any) {
 		try {
 			const {page} = passContext;
@@ -40,7 +42,6 @@ export class CollectAssets extends Collect {
 				const scriptSrcs: any[] = []
 				const styles: object[] = [];
 				const scripts: object[] = [];
-				const linkElements : object[] = []
 
 				const isCssStyleTag = (element:any) =>
 					element.tagName === 'STYLE' &&
@@ -114,30 +115,12 @@ export class CollectAssets extends Collect {
 						}
 						
 					})
-
-				Array.from(document.querySelectorAll('link')).forEach((element:any)=>{
-					if(element.href){
-						const attr = getElementAttributes(element)
-						linkElements.push({href:element.href, attr })
-					}
-					
-
-				})
-
-			
-						
-				
+	
 				const cssInfo = {styleHrefs, styles};
 				const jsInfo = {scriptSrcs, scripts}
 
-				return {css:cssInfo, js:jsInfo, other:{linkElements}}
+				return {css:cssInfo, js:jsInfo}
 			});
-
-
-
-
-			
-
 
 			return {
 					css:{
@@ -150,19 +133,7 @@ export class CollectAssets extends Collect {
 					}
 				
 			}
-			/*
-			return [
-				
-				{
-				info: information.cssInfo,
-				sheets
-			},
-			{
-				info:information.jsInfo,
-				scripts
-			}
-			]
-			*/
+		
 		} catch (error) {
 			console.error('CSS-COLLECT', error);
 		}

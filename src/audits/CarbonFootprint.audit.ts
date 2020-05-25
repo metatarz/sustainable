@@ -72,14 +72,15 @@ try{
 
                 return records.map(record=>{
 
-                    if(record.isGreen === false){
+                    //TODO: Bring the carbon data by regions first
+                   /* if(record.isGreen === false){
                         const location = getGeoLocationMem(record.ip)
 
                         return {
                             ...record,
                             location
                         }
-                    }
+                    }*/
 
                     return record
                 })

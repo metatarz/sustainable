@@ -5,7 +5,10 @@ import AbortController from 'abort-controller'
 export function urlIsValid(url:string){
 	
 	const regexp = new RegExp(/(https?:\/\/)?[\w\-~]+(\.[\w\-~]+)+(\/[\w\-~]*)*(#[\w\-]*)?(\?.*)?/);
-	if(!regexp.test(url)) return false
+	if(!regexp.test(url)){
+		return false
+	}
+	
 
 	const notAllowedUrlParts = ['file://', 'localhost', '127.0.0.1', '::1'];
 	for(const n in notAllowedUrlParts ){
@@ -35,9 +38,7 @@ export async function headTestPassed(url:string){
 	
 	if(response){
 		const status = response.status
-		const headers = response.headers
-
-		if(status>=200 && status <=299 && headers.get('Content-Length')){
+		if(status>=200 && status <=299){
 			return true
 		}
 	}
