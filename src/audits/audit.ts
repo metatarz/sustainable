@@ -7,7 +7,7 @@ export default class Audit{
     return {} as SA.Audit.Meta
    }
 
-   static audit(traces:SA.DataLog.TransferTrace | SA.DataLog.GeneralTrace | 
+   static audit(traces:SA.DataLog.TransferTrace | SA.DataLog.GeneralTrace | SA.DataLog.Traces |
       SA.DataLog.MediaTrace | SA.DataLog.FontsTrace | SA.DataLog.CssTrace | SA.DataLog.JsTrace |
       SA.DataLog.HtmlTrace, url?:string):Promise<SA.Audit.Result | undefined> | SA.Audit.Result | undefined{
     return {} as SA.Audit.Result 
@@ -33,30 +33,13 @@ export default class Audit{
 
 
    /**
-    * @description Computes a global score regarding audit score weights.
+    * @description Computes a global calculated as the average sum of category scores.
     *
-    * @param audits @type {SA.Audit.Result[]} Array of Audits
+    * @param audits @type {category:string, score:number, audits: SA.Audits.Result[]}[]
     * @returns {number} A score between [0-100]
     */
-   static computeScore(audits:SA.Audit.Result[]){
-
-try{
-      const totalScoreByAuditType = audits.map(audit=>{
-         
-         const weight = DEFAULT.REPORT.scoringWeight[audit.meta.scoringType]
-         const partialScore = audit.score!*weight
-         return partialScore
-      })
-
-
-      const rawScore = sum(totalScoreByAuditType)/(totalScoreByAuditType.length+1)
-      const score = Math.round(rawScore*100)
-      return score
-
-}catch(error){
-   console.log(error);
-   
-}
+   static computeScore(audits:any){
+     return  Math.round(sum(audits.map((audit:any)=>audit.score))/2)
    }
 
    static groupAudits(list:Array<any>){

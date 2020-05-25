@@ -25,6 +25,7 @@ import { NoConsoleLogsAudit } from '../audits/NoConsoleLogs.audit';
 import { UsesLazyLoadingAudit } from '../audits/UsesLazyLoading.audit';
 import {UsesGreenServerAudit } from '../audits/UsesGreenServer.audit';
 import { UsesFontSubsettingAudit } from '../audits/UsesFontSubsetting.audit';
+import { UsesWebpImageFormatAudit } from '../audits/UsesWebpImageFormat.audit';
 
 
 export class Commander {
@@ -105,60 +106,42 @@ export class Commander {
 					const promiseArray = (Object.keys(this._audits).map(async (k: string) => {
 						switch (k) {
 							
-							case 'HTML':
-								 const htmlTraces = await CollectHTML.afterPass(
-									passContext,
-									this._appOptions
-								);
-								
-								 return null
-							
 
-							case 'TRANSFER':
-							
-								
-								const transfer = await Promise.allSettled([
+							case 'SERVER':{
+
+								const server = await Promise.allSettled([
 									CollectTransfer.atPass(passContext),
 									CollectFailedTransfers.atPass(passContext),
-									CollectRedirect.atPass(passContext)
+									CollectRedirect.atPass(passContext),
+									CollectConsole.afterPass(passContext, this._appOptions)
+
 								]);
 
-								const transferTraces = Collect.parseAllSettled(transfer)
+								const serverTraces = Collect.parseAllSettled(server)
 								
 								return Promise.allSettled([
-									UsesCompressionAudit.audit(transferTraces),
-									CarbonFootprintAudit.audit(transferTraces),
-									UsesHTTP2Audit.audit(transferTraces,url),
-									UsesGreenServerAudit.audit(transferTraces,url)
+									UsesCompressionAudit.audit(serverTraces),
+									CarbonFootprintAudit.audit(serverTraces),
+									UsesHTTP2Audit.audit(serverTraces,url),
+									UsesGreenServerAudit.audit(serverTraces,url),
+									UsesWebpImageFormatAudit.audit(serverTraces),
+									NoConsoleLogsAudit.audit(serverTraces)
 								])
-								
+							}
 
-								
-							case 'GENERAL':
-
-				
-								const general = await Promise.allSettled([
-									CollectConsole.afterPass(passContext, this._appOptions),
-									CollectPerformance.afterPass(passContext)
-								]);
-								const generalTraces = Collect.parseAllSettled(general)
-
-								return NoConsoleLogsAudit.audit(generalTraces)
-								
-								
-							case 'FONTS':
-					
-								const cssPlusFonts= await Promise.allSettled([
+							case 'DESIGN': {
+								const design= await Promise.allSettled([
 									CollectSubfont.afterPass(passContext),
-									CollectAssets.afterPass(passContext)
+									CollectAssets.afterPass(passContext),
+									CollectImages.afterPass(passContext)
 								])
-								const cssPlusFontsTraces = Collect.parseAllSettled(cssPlusFonts)
+								const designTraces = Collect.parseAllSettled(design)
 								
-								return UsesFontSubsettingAudit.audit(cssPlusFontsTraces)
-							
-							case 'MEDIA':
-								const mediaTraces = await CollectImages.afterPass(passContext)
-								return UsesLazyLoadingAudit.audit(mediaTraces.media)
+								return Promise.allSettled([
+									UsesFontSubsettingAudit.audit(designTraces),
+									UsesLazyLoadingAudit.audit(designTraces)
+								])
+							}
 
 							default:
 								break;

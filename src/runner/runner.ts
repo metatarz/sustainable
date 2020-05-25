@@ -112,9 +112,11 @@ export default class Runner{
 		
 		const resultsParsed = Collect.parseAllSettled(results, true)
 
-		const globalScore = Audit.computeScore(resultsParsed)
+		//const globalScore = Audit.computeScore(resultsParsed)
 
 		const audits = Audit.groupAudits(resultsParsed)
+		const globalScore = Audit.computeScore(audits)
+
 
 		const meta = {
 			id:projectId,

@@ -81,6 +81,8 @@ export const DEFAULT: SA.Config.DefaultOptions = {
 		design:{description:'Hands-on the website assets that convert code to user-friendly content: images, css stylesheets, scripts, fonts.'}
 	},
 	AUDITS: {
+
+		/*
 		JS: [
 			'minification',
 			'bundle',
@@ -119,6 +121,7 @@ export const DEFAULT: SA.Config.DefaultOptions = {
 			'analytics'
 			// 'page_screenshot',
 		],
+		*/
 
 		SERVER: [
 			'performance',
@@ -129,6 +132,18 @@ export const DEFAULT: SA.Config.DefaultOptions = {
 			'special_headers',
 			'http2',
 			'bot_blocking'
+		],
+
+		DESIGN : [
+			'images_limitation',
+			'images_compression',
+			'images_decorative',
+			'images_lazy',
+			'video_limitation',
+			'video_autoplay',
+			'webfonts_limitation', 
+			'compression', 
+			'webfonts_subsets'
 		]
 	},
 

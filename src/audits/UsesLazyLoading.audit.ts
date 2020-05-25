@@ -16,16 +16,16 @@ export class UsesLazyLoadingAudit  extends Audit{
     }
 
 
-    static audit(traces:SA.DataLog.MediaTrace):SA.Audit.Result{
+    static audit(traces:SA.DataLog.Traces):SA.Audit.Result{
 
         const urls = new Set()
-            traces.images.filter((img)=>{
+            traces.media.images.filter((img)=>{
             const imgAttr = Object.keys(img)
             //search for 'lazy' word inclusion in class attr
     
            if(imgAttr && imgAttr.includes('src')){
                const imageSrc = img.src
-               return !(traces.lazyImages.includes(imageSrc))
+               return !(traces.media.lazyImages.includes(imageSrc))
            }
 
         }).map(img=>{
@@ -48,7 +48,7 @@ export class UsesLazyLoadingAudit  extends Audit{
             
         })
 
-        const score = Number(traces.lazyImages.length>0)
+        const score = Number(traces.media.lazyImages.length>0)
         const meta = Audit.successOrFailureMeta(UsesLazyLoadingAudit.meta, score)
 
         
