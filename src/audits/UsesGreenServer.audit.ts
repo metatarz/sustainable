@@ -32,11 +32,11 @@ export class UsesGreenServerAudit extends Audit{
         const ipAddress = traces.record.
         find(record=>{
             const hostname = new URL(record.response.url).hostname
-            Array.from(hosts.values()).includes(hostname)?true:false
+            return Array.from(hosts.values()).includes(hostname)?true:false
         })?.response.remoteAddress.ip
         
         const {green, hostedby} = await isGreenServerMem(ipAddress!)
-        
+
         const score = Number(green) || 0    
         const meta = Audit.successOrFailureMeta(UsesGreenServerAudit.meta, score)
 
