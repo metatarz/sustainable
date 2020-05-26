@@ -96,6 +96,9 @@ try{
             (record.CDP.compressedSize.value>0?record.CDP.compressedSize.value:record.response.uncompressedSize.value) 
         return acc
     }, {} as Record<string, number>)
+    
+
+
 
     const recordsByFileSizePercentage= Object.keys(recordsByFileSize).map((key) =>{
         const val = (recordsByFileSize[key]/totalTransfersize*100).toFixed(2)
@@ -146,8 +149,8 @@ try{
             extendedInfo:{
                 value:{
                     totalTransfersize:[totalTransfersize,'bytes'],
-                    totalWattage:[sum(totalWattage), 'kWh'],
-                    carbonfootprint:[metric, 'gCO2eq / 100 views'],
+                    totalWattage:[sum(totalWattage).toFixed(10), 'kWh'],
+                    carbonfootprint:[metric.toFixed(5), 'gCO2eq / 100 views'],
                     share:recordsByFileSizePercentage
                 }
             }

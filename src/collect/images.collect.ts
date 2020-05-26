@@ -5,7 +5,7 @@ export class CollectImages extends Collect{
         const {page} = passContext;
         const lazyImages:string[] = []
 
-        await page.waitForNavigation({waitUntil:'load'});
+        await page.waitForNavigation({waitUntil:'networkidle0'});
 
         const fetchImages = async ()=> {
             return await page.evaluate(()=>{

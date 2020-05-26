@@ -1,4 +1,5 @@
 import Audit from "./audit";
+import { isGreenServerMem } from "../helpers/isGreenServer";
 
 /**
  * @fileoverview Audit request in the same origin as host use HTTP2.0
@@ -21,14 +22,25 @@ export class UsesHTTP2Audit extends Audit{
     static audit(traces:SA.DataLog.TransferTrace, url:string):SA.Audit.Result | undefined{
     try{
         const urls = new Set()
-        const initialHost = new URL(url).host
+        const hosts = new Set()
+        const initialHost = new URL(url).hostname
+        hosts.add(initialHost)
+
+        //check if there has been a redirect to initial host
+
+
+        const redirect = traces.redirect?.find(record=>new URL(record.url).hostname===initialHost)?.redirectsTo
+
+        if(redirect){
+            hosts.add(new URL(redirect).hostname)
+        }
         
         const resources = traces.record.filter((record)=>{
 
-            const host = new URL(record.request.url).host
+            const hostname = new URL(record.request.url).hostname
             if(record.response.fromServiceWorker) return false
             if(record.request.protocol ==='h2') return false
-            if(initialHost !==host) return false
+            if(!Array.from(hosts.values()).includes(hostname)) return false
             
             return true
        
@@ -48,12 +60,7 @@ export class UsesHTTP2Audit extends Audit{
         return {
             meta,
             score,
-            scoreDisplayMode:'binary',
-            extendedInfo:{
-                value:{
-                    resources   
-                }
-            }
+            scoreDisplayMode:'binary'
            
         }
     }catch(error){

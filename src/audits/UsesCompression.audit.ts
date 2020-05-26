@@ -77,15 +77,12 @@ try{
 
     const score = Number(resources.length === 0)
     const meta = Audit.successOrFailureMeta(UsesCompressionAudit.meta, score)
-
         return {
             meta:meta,
             score:score,
             scoreDisplayMode:'binary',
             extendedInfo: {
-                value:{
-                    resources
-                }
+                value:Array.from(urls.values())
             }
         }
     }catch(error){

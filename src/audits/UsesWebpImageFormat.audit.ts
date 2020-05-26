@@ -48,9 +48,7 @@ export class UsesWebpImageFormatAudit extends Audit {
             score,
             scoreDisplayMode:'binary',
             extendedInfo:{
-                value:{
-                    urls:resources
-                }
+                value:resources
             }
            
         }

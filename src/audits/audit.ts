@@ -49,7 +49,9 @@ export default class Audit{
 
          const groupByKey = resultsGrouped.get(key)
          
-         const auditScoreRaw = sum(groupByKey.map((result:any)=>result.score))/groupByKey.length
+         const auditScoreRaw = sum(groupByKey.map((result:SA.Audit.Result)=>
+            result.score
+         ))/groupByKey.length
          const auditScore = Math.round(auditScoreRaw*100)
          const catDescription = DEFAULT.CATEGORIES[key].description
          const auditsByPassOrFail = Audit.successOrFailureAudits(groupByKey)

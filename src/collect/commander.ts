@@ -88,10 +88,26 @@ export class Commander {
 	async navigate(page: Page, url: string) {
 		try {
 			console.log('navigating…');
-			await page.goto(url, {
+
+// Do something; once you want to "stop" navigation, call `stopCallback`.
+			
+			/*let stopCallback:any = null
+			const stopPromise = new Promise(x => stopCallback = x);
+			const navigationPromise = Promise.race([
+				page.goto(url, {
 				waitUntil: 'networkidle0',
 				timeout: 0
-			});
+			}),
+			stopPromise
+			])
+			setTimeout(()=>stopCallback(), 30000)
+			*/
+			await page.goto(url, {
+				waitUntil: 'networkidle0',
+				timeout:0
+			})
+
+			
 			console.log('done navigation');
 		} catch (error) {
 			await safeReject(error, this._tracker, this._cluster)

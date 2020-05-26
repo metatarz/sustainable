@@ -104,9 +104,7 @@ export class UsesFontSubsettingAudit extends Audit{
             score:score,
             scoreDisplayMode:'binary',
             extendedInfo: {
-                value:{
-                    fontSubsets
-                }
+                value:Object.assign({}, ...fontSubsets)
             }
         }
     }

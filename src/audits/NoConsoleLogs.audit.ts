@@ -26,12 +26,10 @@ export class NoConsoleLogsAudit extends Audit{
             
             return {
                 meta,
-                score:score,
+                score,
                 scoreDisplayMode:'binary',
                 extendedInfo:{
-                    value:{
-                        results:uniqueResources
-                    }
+                    value:Object.assign({},...uniqueResources)
                 }
             }
         }
