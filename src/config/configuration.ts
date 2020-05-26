@@ -20,6 +20,7 @@ export const DEFAULT: SA.Config.DefaultOptions = {
 
 	CONNECTION_OPTIONS: {
 		maxThrottle:10000,
+		maxNavigationTime:30000,
 		emulatedDevices: [
 			{
 				name: 'Desktop 1920x1080',

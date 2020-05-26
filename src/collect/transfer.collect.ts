@@ -1,5 +1,6 @@
 import Collect from './collect';
 import {performance} from './../helpers/now'
+import { safeNavigateTimeout } from '../helpers/navigateTimeout';
 export default class CollectTransfer extends Collect {
 
 	static async atPass(passContext: any) {
@@ -84,7 +85,7 @@ export default class CollectTransfer extends Collect {
 			});
 			console.log('waiting for navigation to load');
 
-			await page.waitForNavigation({waitUntil:'networkidle0'});
+			await safeNavigateTimeout(page, 'networkidle0')
 			results.map((info:any)=>{
 				info.request.protocol = protocol.find((p:any)=>p.reqId === info.request.requestId).protocol
 				return {

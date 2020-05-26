@@ -1,5 +1,6 @@
 import Collect from './collect';
 import {ConsoleMessage} from 'puppeteer';
+import { safeNavigateTimeout } from '../helpers/navigateTimeout';
 
 export class CollectConsole extends Collect {
 	static async afterPass(passContext: any, options: any): Promise<any> {
@@ -26,7 +27,7 @@ export class CollectConsole extends Collect {
 		});
 
 		try {
-			await page.waitForNavigation({waitUntil:'networkidle0'});
+			await safeNavigateTimeout(page,'networkidle0')
 			return {
 				console: results
 			}

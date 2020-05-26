@@ -1,4 +1,5 @@
 import Collect from './collect';
+import { safeNavigateTimeout } from '../helpers/navigateTimeout';
 
 export class CollectAssets extends Collect {
 
@@ -36,7 +37,7 @@ export class CollectAssets extends Collect {
 				}
 			}
 			});
-			await page.waitForNavigation()
+			await safeNavigateTimeout(page)
 			const information = await page.evaluate(() => {
 				const styleHrefs: any[] = [];
 				const scriptSrcs: any[] = []

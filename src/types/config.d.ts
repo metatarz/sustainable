@@ -7,6 +7,7 @@ declare global {
 				PUPPETEER_OPTIONS: ClusterOptions;
 				CONNECTION_OPTIONS: {
 					maxThrottle:number,
+					maxNavigationTime:number,
 					emulatedDevices: EmulatedDevice[];
 					locations: EmulatedLocation[];
 				};

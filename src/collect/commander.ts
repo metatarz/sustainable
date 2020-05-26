@@ -91,21 +91,24 @@ export class Commander {
 
 // Do something; once you want to "stop" navigation, call `stopCallback`.
 			
-			/*let stopCallback:any = null
+			const tracker = createTracker(page)
+			let stopCallback:any = null
 			const stopPromise = new Promise(x => stopCallback = x);
-			const navigationPromise = Promise.race([
+			setTimeout(()=>stopCallback(), DEFAULT.CONNECTION_OPTIONS.maxNavigationTime)
+			await Promise.race([
 				page.goto(url, {
 				waitUntil: 'networkidle0',
 				timeout: 0
 			}),
 			stopPromise
 			])
-			setTimeout(()=>stopCallback(), 30000)
-			*/
-			await page.goto(url, {
+			
+			
+			/*await page.goto(url, {
 				waitUntil: 'networkidle0',
 				timeout:0
 			})
+			*/
 
 			
 			console.log('done navigation');

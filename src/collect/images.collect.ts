@@ -1,11 +1,12 @@
 import Collect from "./collect";
+import { safeNavigateTimeout } from "../helpers/navigateTimeout";
 
 export class CollectImages extends Collect{
     static async afterPass(passContext:any){
         const {page} = passContext;
         const lazyImages:string[] = []
 
-        await page.waitForNavigation({waitUntil:'networkidle0'});
+        await safeNavigateTimeout(page, 'networkidle0')
 
         const fetchImages = async ()=> {
             return await page.evaluate(()=>{

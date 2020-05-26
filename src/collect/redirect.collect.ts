@@ -1,4 +1,5 @@
 import Collect from './collect';
+import { safeNavigateTimeout } from '../helpers/navigateTimeout';
 
 export class CollectRedirect extends Collect {
 	static async atPass(passContext: any): Promise<any> {
@@ -25,7 +26,7 @@ export class CollectRedirect extends Collect {
 		try {
 			console.log('waiting for navigation to load');
 
-			await page.waitForNavigation({waitUntil:'networkidle0'});
+			await safeNavigateTimeout(page, 'networkidle0')
 			return {
 				 redirect:results
 			}
