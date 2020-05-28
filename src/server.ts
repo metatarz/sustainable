@@ -34,10 +34,7 @@ export default class App{
         app.listen(this._port, 'localhost', ()=> console.log('Server running on port :', this._port))
 
         //launch redis server
-        const connection = new Redis({
-            host:'redis',
-            port:6379
-        })
+        const connection = new Redis()
         //launch new Queue
         const queue = new Queue('main', {connection})
 
