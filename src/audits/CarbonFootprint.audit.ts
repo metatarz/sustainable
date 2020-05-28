@@ -49,7 +49,7 @@ try{
                 const getGreenRecord =  async () => {
                     const pArray = traces.record.map(async record =>{
                         const isGreen = await isGreenServerMem(record.response.remoteAddress.ip)
-                        return isGreen.green
+                        return isGreen?.green
                     })
                     const isGreen = await Promise.all(pArray)
                     return traces.record.map((record,index)=>{

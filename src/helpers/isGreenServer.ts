@@ -9,7 +9,7 @@ interface APIResponse{
     hostedby:string,
     hostedbywebsite:string
 }
-const isGreenServer = async (ip:string):Promise<APIResponse> =>  {
+const isGreenServer = async (ip:string):Promise<APIResponse |undefined> =>  {
     try{   
     const url = `${GREEN_SERVER_API}/${ip}`
     const response = await (await fetch(url)).json()

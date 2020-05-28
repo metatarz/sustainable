@@ -7,8 +7,7 @@ import { Cluster } from 'puppeteer-cluster';
 import { DEFAULT } from '../config/configuration';
 import Collect from '../collect/collect';
 import Audit from '../audits/audit';
-import { performance } from '../helpers/now';
-import { groupBy, sum } from '../bin/statistics';
+
 
 
 //protocol error network.getResponseBody no resource with given identifier found with url: https://www.uoc.edu

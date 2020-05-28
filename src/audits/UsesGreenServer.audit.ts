@@ -35,7 +35,9 @@ export class UsesGreenServerAudit extends Audit{
             return Array.from(hosts.values()).includes(hostname)?true:false
         })?.response.remoteAddress.ip
         
-        const {green, hostedby} = await isGreenServerMem(ipAddress!)
+        const response = await isGreenServerMem(ipAddress!)
+        
+        const {green, hostedby} = response!
 
         const score = Number(green) || 0    
         const meta = Audit.successOrFailureMeta(UsesGreenServerAudit.meta, score)

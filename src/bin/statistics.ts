@@ -13,7 +13,7 @@
  * @param {number} value
  * @return {number}
  */
-export function getLogNormalScore({median, p10}, value:number) {
+export function getLogNormalScore({median, p10}:({median:number, p10:number}), value:number) {
     // Required for the log-normal distribution.
     
     if (median <= 0) throw new Error('median must be greater than zero');

@@ -53,17 +53,17 @@ export class UsesFontSubsettingAudit extends Audit{
             csstree.walk(ast, {
                 enter(node:any){
                     if(node.type==='Atrule' && node.name ==='font-face'){
-                       const hasSubset = node.block.children.some(ch=>{
+                       const hasSubset = node.block.children.some((ch:any)=>{
                             if (ch.property === 'unicode-range'){
                                 return true
                             }
                         })
 
-                        const fontName = node.block.children.filter(ch=>{
+                        const fontName = node.block.children.filter((ch:any)=>{
                             if(ch.property === 'font-family'){
                                 return true
                             }
-                        }).tail.data.value.children.map(ch=>ch.value)
+                        }).tail.data.value.children.map((ch:any)=>ch.value)
 
                         fonts.push({fontName, hasSubset})
                         

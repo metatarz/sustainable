@@ -2,16 +2,13 @@ import {Page} from 'puppeteer';
 import {DEFAULT} from '../config/configuration';
 import CollectTransfer from './transfer.collect';
 import path from 'path';
-import {CollectHTML} from './html.collect';
 import fs from 'fs';
 // @ts-ignore
-import {environment} from '../../environment';
 import {CollectConsole} from './console.collect';
 import {CollectAssets} from './assets.collect';
 import {CollectRedirect} from './redirect.collect';
 import {CollectFailedTransfers} from './failed-transfer.collect';
 import {CollectSubfont} from './subfont.collect';
-import {CollectPerformance} from './perf.collect';
 import { CollectImages } from './images.collect';
 import SystemMonitor from '../vendors/SystemMonitor';
 import { performance } from '../helpers/now';
@@ -31,7 +28,6 @@ import { UsesWebpImageFormatAudit } from '../audits/UsesWebpImageFormat.audit';
 export class Commander {
 	_options = DEFAULT.CONNECTION_OPTIONS;
 	_audits = DEFAULT.AUDITS;
-	_appOptions = environment;
 	_dataLog = {} as SA.DataLog.Format;
 	_startTime=performance.now()
 	_tracker:any
@@ -91,7 +87,7 @@ export class Commander {
 
 // Do something; once you want to "stop" navigation, call `stopCallback`.
 			
-			const tracker = createTracker(page)
+			//const tracker = createTracker(page)
 			let stopCallback:any = null
 			const stopPromise = new Promise(x => stopCallback = x);
 			setTimeout(()=>stopCallback(), DEFAULT.CONNECTION_OPTIONS.maxNavigationTime)
@@ -127,17 +123,17 @@ export class Commander {
 							
 
 							case 'SERVER':{
-
+								//@ts-ignore
 								const server = await Promise.allSettled([
 									CollectTransfer.atPass(passContext),
 									CollectFailedTransfers.atPass(passContext),
 									CollectRedirect.atPass(passContext),
-									CollectConsole.afterPass(passContext, this._appOptions)
+									CollectConsole.afterPass(passContext)
 
 								]);
 
 								const serverTraces = Collect.parseAllSettled(server)
-								
+								//@ts-ignore
 								return Promise.allSettled([
 									UsesCompressionAudit.audit(serverTraces),
 									CarbonFootprintAudit.audit(serverTraces),
@@ -149,13 +145,14 @@ export class Commander {
 							}
 
 							case 'DESIGN': {
+								//@ts-ignore
 								const design= await Promise.allSettled([
 									CollectSubfont.afterPass(passContext),
 									CollectAssets.afterPass(passContext),
 									CollectImages.afterPass(passContext)
 								])
 								const designTraces = Collect.parseAllSettled(design)
-								
+								//@ts-ignore
 								return Promise.allSettled([
 									UsesFontSubsettingAudit.audit(designTraces),
 									UsesLazyLoadingAudit.audit(designTraces)

@@ -27,17 +27,17 @@ export default class Collect {
 	
 			}
 
-			const result = data.map(res=>{
+			const result = data.map((res:any)=>{
 				return parser(res)
 			})
 
 			if(!audit){
 			return Object.assign({}, ...result)
 			}else{
-				return result.filter(data=>data).flatMap((data)=>{
+				return result.filter((data:any)=>data).flatMap((data:any)=>{
 				const isArray = Array.isArray(data)
 				if(isArray){
-					return data.map(d=>d.value)
+					return data.map((d:any)=>d.value)
 				}
 				
 				return data

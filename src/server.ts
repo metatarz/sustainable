@@ -9,20 +9,11 @@ const bodyParser = require('body-parser')
 
 export default class App{
 
-    _ENV='dev'
     _port:number;
     _runner:any;
 
     constructor(){
-        if(this._ENV==='prod'){
-            this._port=7120
-        } else if(this._ENV ==='dev'){
-            this._port=7200
-        } else{
-            console.log('ENV is unknown, exit...');
-            process.exit(1)
-            
-        }
+        this._port = Number(process.env.PORT) || 7200
 
     }
 
@@ -43,7 +34,10 @@ export default class App{
         app.listen(this._port, 'localhost', ()=> console.log('Server running on port :', this._port))
 
         //launch redis server
-        const connection = new Redis()
+        const connection = new Redis({
+            host:'redis',
+            port:6379
+        })
         //launch new Queue
         const queue = new Queue('main', {connection})
 

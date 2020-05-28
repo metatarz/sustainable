@@ -15,7 +15,7 @@ export const DEFAULT: SA.Config.DefaultOptions = {
 		retryDelay: 0,
 		skipDuplicateUrls: false,
 		sameDomainDelay: 0,
-		puppeteer: undefined
+		puppeteer:undefined
 	},
 
 	CONNECTION_OPTIONS: {

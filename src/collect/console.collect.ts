@@ -3,7 +3,7 @@ import {ConsoleMessage} from 'puppeteer';
 import { safeNavigateTimeout } from '../helpers/navigateTimeout';
 
 export class CollectConsole extends Collect {
-	static async afterPass(passContext: any, options: any): Promise<any> {
+	static async afterPass(passContext: any): Promise<any> {
 		const {page} = passContext;
 
 		const results: object[] = [];
@@ -15,11 +15,12 @@ export class CollectConsole extends Collect {
 				text: message.text()
 			};
 
-			if (options.debug) {
+			/*if (options.debug) {
 				for (let i = 0; i < message.args().length; ++i) {
 					console.log(`${i}: ${message.args()[i]}`);
 				}
 			}
+			*/
 
 			  
 
