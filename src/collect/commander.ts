@@ -90,23 +90,21 @@ export class Commander {
 			//const tracker = createTracker(page)
 			let stopCallback:any = null
 			const stopPromise = new Promise(x => stopCallback = x);
-			setTimeout(()=>stopCallback(), DEFAULT.CONNECTION_OPTIONS.maxNavigationTime)
+			const navigateAndClearTimeout= async ()=>{
+				await page.goto(url, {
+					waitUntil: 'networkidle0',
+					timeout:0
+				})
+				clearTimeout(stopNavigation)
+			}
+			const stopNavigation = setTimeout(()=>stopCallback(), DEFAULT.CONNECTION_OPTIONS.maxNavigationTime)
 			await Promise.race([
-				page.goto(url, {
-				waitUntil: 'networkidle0',
-				timeout: 0
-			}),
-			stopPromise
+				navigateAndClearTimeout(),
+				stopPromise
 			])
-			
-			
-			/*await page.goto(url, {
-				waitUntil: 'networkidle0',
-				timeout:0
-			})
-			*/
 
-			
+			page.removeAllListeners('requestfinished')
+			page.removeAllListeners('response')
 			console.log('done navigation');
 		} catch (error) {
 			await safeReject(error, this._tracker, this._cluster)

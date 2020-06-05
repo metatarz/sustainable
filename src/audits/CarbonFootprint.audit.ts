@@ -30,8 +30,8 @@ export class CarbonFootprintAudit extends Audit{
 
     static async audit(traces:SA.DataLog.TransferTrace):Promise<SA.Audit.Result| undefined>{
 try{
-        const getGeoLocation = (ip:string) => {
-            //2 letter ISO-3166-1 country code https://www.iban.com/country-codes */
+        /*const getGeoLocation = (ip:string) => {
+            //2 letter ISO-3166-1 country code https://www.iban.com/country-codes 
             const country = geoip.lookup(ip)?.country
             
             if(country){
@@ -43,6 +43,7 @@ try{
             }
 
         const getGeoLocationMem = memoize(getGeoLocation)
+        */
 
         const getValidRecords = async () => {
                 
@@ -53,7 +54,6 @@ try{
                     })
                     const isGreen = await Promise.all(pArray)
                     return traces.record.map((record,index)=>{
-
                         return {
                             id:record.request.requestId,
                             host:new URL(record.response.url).host,
@@ -65,12 +65,10 @@ try{
     
                     })
                     }
+                return await getGreenRecord()
+                
 
-
-
-                const records = await getGreenRecord()
-
-                return records.map(record=>{
+                /*return records.map(record=>{
 
                     //TODO: Bring the carbon data by regions first
                    /* if(record.isGreen === false){
@@ -80,10 +78,11 @@ try{
                             ...record,
                             location
                         }
-                    }*/
+                    }
 
                     return record
                 })
+                */
             }
 
         const records = await getValidRecords();
@@ -97,9 +96,6 @@ try{
         return acc
     }, {} as Record<string, number>)
     
-
-
-
     const recordsByFileSizePercentage= Object.keys(recordsByFileSize).map((key) =>{
         const val = (recordsByFileSize[key]/totalTransfersize*100).toFixed(2)
 
@@ -107,8 +103,6 @@ try{
             [key]:val
         }
     })
-
-
         const totalWattage= records.
         map((record:any)=>{
             let size;
@@ -117,9 +111,6 @@ try{
             }else{
                 size = record.unSize
             }
-
-           
-            
             size = size/(MB_TO_BYTES*GB_TO_MB)
             if(record.isGreen){
                 size*=variables.coreNetwork[0]
@@ -129,17 +120,13 @@ try{
             
             return size
         })
-
-    
-        
-
         //apply references values
         const metric = sum(totalWattage)*variables.defaultCarbonIntensity[0]*
                         variables.defaultDailyVisitors[0]
 
         const {median, p10} = DEFAULT.REPORT.scoring.CF
 
-        const score = Audit.computeLogNormalScore({median, p10}, metric)   
+        const score = Audit.computeLogNormalScore({median, p10}, metric) || 0   
         const meta = Audit.successOrFailureMeta(CarbonFootprintAudit.meta, score)
 
         return {
@@ -154,8 +141,6 @@ try{
                     share:recordsByFileSizePercentage
                 }
             }
-            
-
 
         }
     }catch(error){

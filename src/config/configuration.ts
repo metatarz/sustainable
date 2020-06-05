@@ -10,7 +10,7 @@ export const DEFAULT: SA.Config.DefaultOptions = {
 		},
 		perBrowserOptions: undefined,
 		monitor: true,
-		timeout: 90 * 1000,
+		timeout: 180 * 1000,
 		retryLimit: 0,
 		retryDelay: 0,
 		skipDuplicateUrls: false,
@@ -19,8 +19,8 @@ export const DEFAULT: SA.Config.DefaultOptions = {
 	},
 
 	CONNECTION_OPTIONS: {
-		maxThrottle:10000,
-		maxNavigationTime:30000,
+		maxThrottle:15000,
+		maxNavigationTime:90000,
 		emulatedDevices: [
 			{
 				name: 'Desktop 1920x1080',

@@ -1,5 +1,4 @@
 import Collect from './collect';
-import { waitForNetworkIdle } from '../helpers/waitfor-networkidle';
 import { safeNavigateTimeout } from '../helpers/navigateTimeout';
 
 export class CollectFailedTransfers extends Collect {
@@ -7,7 +6,7 @@ export class CollectFailedTransfers extends Collect {
 		const {page} = passContext;
 		const result: any = [];
 		page.on('response', (response: any) => {
-
+			
 			const status = response.status;
 			const url = response.url;
 			if (status >= 400) {
