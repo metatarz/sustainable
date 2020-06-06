@@ -1,7 +1,7 @@
 export const DEFAULT: SA.Config.DefaultOptions = {
 	PUPPETEER_OPTIONS: {
 		concurrency: 2,
-		maxConcurrency: 4,
+		maxConcurrency: 10,
 		workerCreationDelay: 0,
 		puppeteerOptions: {
 			headless: true,
@@ -10,15 +10,17 @@ export const DEFAULT: SA.Config.DefaultOptions = {
 		},
 		perBrowserOptions: undefined,
 		monitor: true,
-		timeout: 40 * 1000,
+		timeout: 90 * 1000,
 		retryLimit: 0,
 		retryDelay: 0,
 		skipDuplicateUrls: false,
 		sameDomainDelay: 0,
-		puppeteer: undefined
+		puppeteer:undefined
 	},
 
 	CONNECTION_OPTIONS: {
+		maxThrottle:5000,
+		maxNavigationTime:30000,
 		emulatedDevices: [
 			{
 				name: 'Desktop 1920x1080',
@@ -75,8 +77,13 @@ export const DEFAULT: SA.Config.DefaultOptions = {
 			}
 		]
 	},
-
+	CATEGORIES: {
+		server:{description:'Server aspects which are essential for online sustainability: green hosting, carbon footprint, data transfer.'},
+		design:{description:'Hands-on the website assets that convert code to user-friendly content: images, css stylesheets, scripts, fonts.'}
+	},
 	AUDITS: {
+
+		/*
 		JS: [
 			'minification',
 			'bundle',
@@ -115,6 +122,7 @@ export const DEFAULT: SA.Config.DefaultOptions = {
 			'analytics'
 			// 'page_screenshot',
 		],
+		*/
 
 		SERVER: [
 			'performance',
@@ -125,6 +133,18 @@ export const DEFAULT: SA.Config.DefaultOptions = {
 			'special_headers',
 			'http2',
 			'bot_blocking'
+		],
+
+		DESIGN : [
+			'images_limitation',
+			'images_compression',
+			'images_decorative',
+			'images_lazy',
+			'video_limitation',
+			'video_autoplay',
+			'webfonts_limitation', 
+			'compression', 
+			'webfonts_subsets'
 		]
 	},
 
@@ -139,7 +159,7 @@ export const DEFAULT: SA.Config.DefaultOptions = {
 			transfer: 0.23076923076923078
 		},
 		scoring:{
-			CF:{median:11, p10:3, name:'Carbon Footprint'}
+			CF:{median:4, p10:1.2, name:'Carbon Footprint'}
 		},
 		format: 'json',
 		webhook: ''

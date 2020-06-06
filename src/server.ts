@@ -1,5 +1,5 @@
 import express = require('express')
-import validUrl from './helpers/validUrl'
+import {urlIsValid, headTestPassed} from './helpers/validUrl'
 import {Queue, QueueEvents} from 'bullmq'
 const Redis = require('ioredis')
 import Runner from './runner/runner';
@@ -9,20 +9,11 @@ const bodyParser = require('body-parser')
 
 export default class App{
 
-    _ENV='dev'
     _port:number;
     _runner:any;
 
     constructor(){
-        if(this._ENV==='prod'){
-            this._port=7120
-        } else if(this._ENV ==='dev'){
-            this._port=7200
-        } else{
-            console.log('ENV is unknown, exit...');
-            process.exit(1)
-            
-        }
+        this._port = Number(process.env.PORT) || 7200
 
     }
 
@@ -34,7 +25,15 @@ export default class App{
         const app = express()
         app.use(bodyParser.urlencoded({extended: true}));
         app.use(bodyParser.json());
-        app.listen(this._port, 'localhost', ()=> console.log('Server running on port :', this._port))
+       
+        /*app.all('/*', function(req, res, next) {
+ 	 res.header("Access-Control-Allow-Origin", "*");
+ 	 res.header("Access-Control-Allow-Headers", "X-Requested-With, Content-Type, Accept");
+ 	 res.header("Access-Control-Allow-Methods", "POST, GET");
+ 	 next();
+	});       
+        */   
+        app.listen(this._port, ()=> console.log('Server running on port :', this._port))
 
         //launch redis server
         const connection = new Redis()
@@ -63,10 +62,19 @@ export default class App{
             res.sendStatus(200)
         })
         app.post('/service/add', async (req,res) => {
-            const {url} = req.body
-            if(!validUrl(url)){
-                res.status(400).send({status:'error'})
+            let {url} = req.body
+            url=url.trim()
+            
+            if(typeof url !== 'string' || !urlIsValid(url)){
+                return res.status(400).send({status:'Error invalid URL'})
             }
+            if(!url.startsWith('http')){
+                url='https://'+url
+            }
+
+            if(await headTestPassed(url)){
+
+            
             const job = await queue.add('audit', {
                 url:url
             })
@@ -76,7 +84,7 @@ export default class App{
 
             queueEvents.on('completed', ({ jobId, returnvalue }) => {
                 if(_jobId ===jobId){
-                    res.status(200).send({result:returnvalue})
+                    res.status(200).send({...returnvalue})
                 }
             });
             queueEvents.on('failed', ({ jobId, failedReason }) => {
@@ -84,7 +92,10 @@ export default class App{
                     res.send(500).json(failedReason)
                 }
 			    
-			});
+            });
+        }else{
+            return res.status(400).send({status:'Error unknown URL'})
+        }
 
          })
 

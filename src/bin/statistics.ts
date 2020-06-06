@@ -13,7 +13,7 @@
  * @param {number} value
  * @return {number}
  */
-export function getLogNormalScore({median, p10}, value:number) {
+export function getLogNormalScore({median, p10}:({median:number, p10:number}), value:number) {
     // Required for the log-normal distribution.
     
     if (median <= 0) throw new Error('median must be greater than zero');
@@ -70,4 +70,19 @@ function erf(x:number) {
   export function sum(array:Array<number>){
       return array.reduce((total:number, actual:number)=>total+actual)
   }
+
+  export function groupBy(list:Array<any>, keyGetter:CallableFunction) {
+    const map = new Map();
+    list.forEach((item) => {
+         const key = keyGetter(item);
+         const collection = map.get(key);
+         if (!collection) {
+             map.set(key, [item]);
+         } else {
+             collection.push(item);
+         }
+    });
+    return map;
+}
+
   

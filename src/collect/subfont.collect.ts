@@ -1,4 +1,5 @@
 import Collect from './collect';
+import { safeNavigateTimeout } from '../helpers/navigateTimeout';
 
 export class CollectSubfont extends Collect {
 	static async afterPass(passContext: any, options?: any): Promise<any> {
@@ -6,7 +7,7 @@ export class CollectSubfont extends Collect {
 
 			//may be interesting to give a try at Page._client.FontFamilies
 			const {page} = passContext;
-			await page.waitForNavigation({waitUntil:'networkidle0'})
+			await safeNavigateTimeout(page)
 			const result = await page.evaluate(function(options_: any) {
 				try {
 					// @ts-ignore

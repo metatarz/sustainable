@@ -1,4 +1,5 @@
 import Audit from "./audit";
+import { isGreenServerMem } from "../helpers/isGreenServer";
 
 /**
  * @fileoverview Audit request in the same origin as host use HTTP2.0
@@ -8,26 +9,38 @@ export class UsesHTTP2Audit extends Audit{
         return {
             id:'useshttp2',
             title:'Use HTTP2',
-            failureTitle:'Dont use HTTP2',
+            failureTitle:`Don't use HTTP2`,
             description:`HTTP2 provides advantages such as:
                              multiplexing, server push, binary headers and increased security.`,
-            requiredTraces:['transfer','record']
-        }
+                             category:'server',
+            scoringType:'transfer'
+        } as SA.Audit.Meta
     }
 /**
  * @param traces requiredTraces
  */
-    static audit(traces:any, url:string):SA.Audit.Result{
-    
+    static audit(traces:SA.DataLog.TransferTrace, url:string):SA.Audit.Result | undefined{
+    try{
         const urls = new Set()
-        const initialHost = new URL(url).host
-        
-        const resources = traces.record.filter((record:SA.DataLog.Record)=>{
+        const hosts = new Set()
+        const initialHost = new URL(url).hostname
+        hosts.add(initialHost)
 
-            const host = new URL(record.request.url).host
+        //check if there has been a redirect to initial host
+
+
+        const redirect = traces.redirect?.find(record=>new URL(record.url).hostname===initialHost)?.redirectsTo
+
+        if(redirect){
+            hosts.add(new URL(redirect).hostname)
+        }
+        
+        const resources = traces.record.filter((record)=>{
+
+            const hostname = new URL(record.request.url).hostname
             if(record.response.fromServiceWorker) return false
             if(record.request.protocol ==='h2') return false
-            if(initialHost !==host) return false
+            if(!Array.from(hosts.values()).includes(hostname)) return false
             
             return true
        
@@ -42,14 +55,20 @@ export class UsesHTTP2Audit extends Audit{
             return true
         })
 
+        const score = Number(urls.size === 0)
+        const meta = Audit.successOrFailureMeta(UsesHTTP2Audit.meta, score)
         return {
-            meta:UsesHTTP2Audit.meta,
-            score:Number(resources.length === 0),
+            meta,
+            score,
             scoreDisplayMode:'binary'
            
         }
-
+    }catch(error){
+        console.log((error));
+        
+    }
 
 
     }
+
 }

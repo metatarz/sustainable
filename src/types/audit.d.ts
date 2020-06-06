@@ -6,13 +6,15 @@ declare global{
            
             id:string,
              /** short successful audit title */
-            title:string,
+            title?:string,
             /** short failed audit title */
-            failureTitle:string,
+            failureTitle?:string,
             /** Audit description, showcasinng importance and useful information */
             description:string,
+            /** Audit category: Server or Design */
+            category:"server" | "design",
             /** Traces names this audit requires */
-            requiredTraces:Array<string>,
+            scoringType:ScoreWeights,
 
 
         }
@@ -20,6 +22,9 @@ declare global{
         'numeric'|'binary'|'manual'
     
         export type ScoreDisplayMode = Audit.ScoreDisplayModes[keyof Audit.ScoreDisplayModes];
+
+        export type ScoreWeights = 
+        'transfer' | 'general' | 'media' | 'html' | 'js' | 'server' | 'fonts'
 
         export interface Result{
 

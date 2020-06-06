@@ -1,12 +1,12 @@
 {
     "compilerOptions": {
     "rootDir": "./src",
-      "target": "es2016",
+      "target": "es6",
       "module": "commonjs",
-      "outDir": "./dist",
+      "outDir": "./build",
       "strict": true,
       "esModuleInterop": true,
-      "inlineSourceMap": true,
+      "inlineSourceMap": false,
       "emitDecoratorMetadata":true,
       "experimentalDecorators": true
     },

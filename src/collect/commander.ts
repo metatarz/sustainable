@@ -2,16 +2,13 @@ import {Page} from 'puppeteer';
 import {DEFAULT} from '../config/configuration';
 import CollectTransfer from './transfer.collect';
 import path from 'path';
-import {CollectHTML} from './html.collect';
 import fs from 'fs';
 // @ts-ignore
-import {environment} from '../../environment';
 import {CollectConsole} from './console.collect';
 import {CollectAssets} from './assets.collect';
 import {CollectRedirect} from './redirect.collect';
 import {CollectFailedTransfers} from './failed-transfer.collect';
 import {CollectSubfont} from './subfont.collect';
-import {CollectPerformance} from './perf.collect';
 import { CollectImages } from './images.collect';
 import SystemMonitor from '../vendors/SystemMonitor';
 import { performance } from '../helpers/now';
@@ -21,12 +18,16 @@ import Collect from './collect';
 import { CarbonFootprintAudit } from '../audits/CarbonFootprint.audit';
 import { UsesCompressionAudit } from '../audits/UsesCompression.audit';
 import { UsesHTTP2Audit } from '../audits/UsesHTTP2.audit';
+import { NoConsoleLogsAudit } from '../audits/NoConsoleLogs.audit';
+import { UsesLazyLoadingAudit } from '../audits/UsesLazyLoading.audit';
+import {UsesGreenServerAudit } from '../audits/UsesGreenServer.audit';
+import { UsesFontSubsettingAudit } from '../audits/UsesFontSubsetting.audit';
+import { UsesWebpImageFormatAudit } from '../audits/UsesWebpImageFormat.audit';
 
 
 export class Commander {
 	_options = DEFAULT.CONNECTION_OPTIONS;
 	_audits = DEFAULT.AUDITS;
-	_appOptions = environment;
 	_dataLog = {} as SA.DataLog.Format;
 	_startTime=performance.now()
 	_tracker:any
@@ -37,26 +38,12 @@ export class Commander {
 			if (options) {
 				this._options = options;
 			}
-			this._dataLog = {
-				uid: pId,
-				 url:url, 
-				 monitor:[], 
-				 completed: false, 
-				 traces:{
-					html:[],
-					css:{info:{styleHrefs:[], styles:[]}},
-					js:{info:{scriptSrcs:[], scripts:[]}},
-					transfer:{record:[],failed:[],redirect:[]},
-					general:{console:[], performance:{perf:<Performance>{},metrics:<SA.DataLog.Metrics>{}}},
-					media:{images:[]},
-					fonts:{subfonts:{}}
-					
 
-			}
-		};
+			
+	
 			this._tracker = createTracker(page)
 			this._cluster = cluster
-			this.systemMonitor(this._startTime,'start')
+			//this.systemMonitor(this._startTime,'start')
 
 			// Customable
 			// page.setJavaScriptEnabled(false); Speeds up process drastically
@@ -97,10 +84,27 @@ export class Commander {
 	async navigate(page: Page, url: string) {
 		try {
 			console.log('navigating…');
-			await page.goto(url, {
-				waitUntil: 'networkidle0',
-				timeout: 0
-			});
+
+// Do something; once you want to "stop" navigation, call `stopCallback`.
+			
+			//const tracker = createTracker(page)
+			let stopCallback:any = null
+			const stopPromise = new Promise(x => stopCallback = x);
+			const navigateAndClearTimeout= async ()=>{
+				await page.goto(url, {
+					waitUntil: 'networkidle0',
+					timeout:0
+				})
+				clearTimeout(stopNavigation)
+			}
+			const stopNavigation = setTimeout(()=>stopCallback(), DEFAULT.CONNECTION_OPTIONS.maxNavigationTime)
+			await Promise.race([
+				navigateAndClearTimeout(),
+				stopPromise
+			])
+
+			page.removeAllListeners('requestfinished')
+			page.removeAllListeners('response')
 			console.log('done navigation');
 		} catch (error) {
 			await safeReject(error, this._tracker, this._cluster)
@@ -109,71 +113,50 @@ export class Commander {
 
 	async asyncEvaluate(passContext: any) {
 		try {
-			// Const this._dataLog = this._this._dataLog.find((_pId)=>_pId.id===pId)
-			// TODO Type DataLo
 			const {page, data:url} = passContext
 					console.log('running tasks…');
 					//@ts-ignore
 					const promiseArray = (Object.keys(this._audits).map(async (k: string) => {
 						switch (k) {
-							/*
-							case 'HTML':
-								 const htmlTraces = await CollectHTML.afterPass(
-									passContext,
-									this._appOptions
-								);
-	
-								return console.log(htmlTraces);
-								
-							*/
+							
 
-							case 'TRANSFER':
-								const transfer = await Promise.allSettled([
+							case 'SERVER':{
+								//@ts-ignore
+								const server = await Promise.allSettled([
 									CollectTransfer.atPass(passContext),
 									CollectFailedTransfers.atPass(passContext),
-									CollectRedirect.atPass(passContext)
+									CollectRedirect.atPass(passContext),
+									CollectConsole.afterPass(passContext)
+
 								]);
 
-								const transferTraces = Collect.parseAllSettled(transfer)
-								
+								const serverTraces = Collect.parseAllSettled(server)
+								//@ts-ignore
 								return Promise.allSettled([
-									UsesCompressionAudit.audit(transferTraces),
-									CarbonFootprintAudit.audit(transferTraces,url),
-									UsesHTTP2Audit.audit(transferTraces,url)
+									UsesCompressionAudit.audit(serverTraces),
+									CarbonFootprintAudit.audit(serverTraces),
+									UsesHTTP2Audit.audit(serverTraces,url),
+									UsesGreenServerAudit.audit(serverTraces,url),
+									UsesWebpImageFormatAudit.audit(serverTraces),
+									NoConsoleLogsAudit.audit(serverTraces)
 								])
+							}
 
-								/*
-							case 'GENERAL':
+							case 'DESIGN': {
+								//@ts-ignore
+								const design= await Promise.allSettled([
+									CollectSubfont.afterPass(passContext),
+									CollectAssets.afterPass(passContext),
+									CollectImages.afterPass(passContext)
+								])
+								const designTraces = Collect.parseAllSettled(design)
+								//@ts-ignore
+								return Promise.allSettled([
+									UsesFontSubsettingAudit.audit(designTraces),
+									UsesLazyLoadingAudit.audit(designTraces)
+								])
+							}
 
-
-			
-								/*
-								const general = await Promise.allSettled([
-									CollectConsole.afterPass(passContext, this._appOptions),
-									CollectPerformance.afterPass(passContext)
-								]);
-
-								const generalTraces = Collect.parseAllSettled(general)
-								
-							
-								
-							case 'CSS':
-								const assets = await CollectAssets.afterPass(passContext)
-								const assetsTraces = Collect.parseAllSettled(assets)
-								
-								
-							case 'FONTS':
-								const fonts = await CollectSubfont.afterPass(
-									passContext
-								);
-								
-								const fontsTraces = Collect.parseAllSettled(fonts)
-								
-						
-							case 'MEDIA':
-								const media = await CollectImages.afterPass(passContext)
-								const mediaTraces = Collect.parseAllSettled(media)
-								*/
 							default:
 								break;
 						}
@@ -214,44 +197,6 @@ export class Commander {
 		
 	}
 	}
-
-	async updateDataLog(data){
-
-		await this.systemMonitor(this._startTime,'run')
-		data.map(result=>{
-			if(result.status === 'fulfilled' && result.value){
-				const keys = Object.keys(result.value)
-				if(!Array.isArray(result.value)){
-
-						keys.forEach(key =>{
-							//@ts-ignore
-							this._dataLog.traces[key] = {...result.value[key]}
-						})
-					}else{
-						console.log(result.value.map((a)=>{
-							return {
-								...a.result
-							}
-							
-							
-							//a.concat(b.result)))
-						}))
-						
-
-						
-					}
-				}
-				})
-				this._dataLog.completed = true;
-			}
-			
-		
-		
-	
-
-	
-
-
 
 
 	/**

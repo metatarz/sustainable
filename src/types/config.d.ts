@@ -6,18 +6,18 @@ declare global {
 			export interface DefaultOptions {
 				PUPPETEER_OPTIONS: ClusterOptions;
 				CONNECTION_OPTIONS: {
+					maxThrottle:number,
+					maxNavigationTime:number,
 					emulatedDevices: EmulatedDevice[];
 					locations: EmulatedLocation[];
 				};
+				CATEGORIES:{
+					server:{description:string},
+					design:{description:string}
+				} 
 				AUDITS: {
-					JS: string[];
-					CSS: string[];
-					HTML: string[];
-					MEDIA: string[];
-					FONTS: string[];
-					TRANSFER: string[];
-					GENERAL: string[];
 					SERVER: string[];
+					DESIGN: string[]
 				};
 				REPORT: {
 					scoringWeight: {[key: string]: number};
