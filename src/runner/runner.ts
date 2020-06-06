@@ -7,7 +7,7 @@ import { Cluster } from 'puppeteer-cluster';
 import { DEFAULT } from '../config/configuration';
 import Collect from '../collect/collect';
 import Audit from '../audits/audit';
-import { performance } from '../helpers/now';
+
 
 
 //protocol error network.getResponseBody no resource with given identifier found with url: https://www.uoc.edu
@@ -30,9 +30,7 @@ export default class Runner{
 
 
 	async run(){
-		//should work on cluster.queue directly?
 		const worker = new Worker('main', async job =>{
-			//await this.main(job)
 			try{
 			const {url} = job.data
 			const result = await this._cluster.execute(url, this.handler.bind(this));
@@ -43,6 +41,7 @@ export default class Runner{
 			}
 		
 		}, {concurrency:DEFAULT.PUPPETEER_OPTIONS.maxConcurrency})
+
 	}
 
 	//TODO move this to server
@@ -75,8 +74,7 @@ export default class Runner{
 	
 				await cluster.idle();
 				await cluster.close();
-				
-	
+			
 				process.on('unhandledRejection', async (reason, p) => {
 					console.error(reason,p);
 					throw new Error('Unhandled Rejection at Promise');
@@ -99,9 +97,7 @@ export default class Runner{
 		const commander = new Commander()
 		// Mock project Id
 		const projectId = generate();
-		//important! Place it inside the handler (1 url, 1 commander instance)
-		
-		const {page, data: url} = passContextRaw;
+		const {_, data: url} = passContextRaw;
 		const _page = await commander.setUp(passContextRaw, projectId, this._cluster);
 		const passContext = {page: _page, data: url}
 		const promisesArray = await commander.asyncEvaluate(passContext)
@@ -112,31 +108,24 @@ export default class Runner{
 			...promisesArray!
 			
 		]);
+		
+		const resultsParsed = Collect.parseAllSettled(results, true)
 
-		const resultsParsed = Collect.parseAllSettled(results,true)
+		//const globalScore = Audit.computeScore(resultsParsed)
 
-		const mapResult = resultsParsed[6].map(({value})=>{
-			return {
-				value
-			}
-		})
+		const audits = Audit.groupAudits(resultsParsed)
+		const globalScore = Audit.computeScore(audits)
 
-		const globalScore = Audit.computeScore(mapResult)
+
 		const meta = {
 			id:projectId,
 			url:url,
 			timing:[startTime, Date.now()]
 		}
-		const mapAudit = mapResult.map((audit)=>{
-			return {
-				...audit,
-			}
-		})
-		
 		return {
 			globalScore,
 			meta,
-			audits:mapAudit,
+			audits
 		}
 	}
 	

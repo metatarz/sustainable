@@ -1,3 +1,6 @@
+import { ConcurrencyImplementationClassType } from "puppeteer-cluster/dist/concurrency/ConcurrencyImplementation";
+import { LaunchOptions } from "puppeteer";
+
 export interface ClusterOptions {
 	concurrency: number | ConcurrencyImplementationClassType;
 	maxConcurrency: number;

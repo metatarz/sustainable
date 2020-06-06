@@ -1,6 +1,9 @@
 import Collect from './collect';
+import { safeNavigateTimeout } from '../helpers/navigateTimeout';
 
 export class CollectAssets extends Collect {
+
+	
 	static async afterPass(passContext: any, options?: any) {
 		try {
 			const {page} = passContext;
@@ -34,7 +37,7 @@ export class CollectAssets extends Collect {
 				}
 			}
 			});
-			await page.waitForNavigation()
+			await safeNavigateTimeout(page)
 			const information = await page.evaluate(() => {
 				const styleHrefs: any[] = [];
 				const scriptSrcs: any[] = []
@@ -113,18 +116,14 @@ export class CollectAssets extends Collect {
 						}
 						
 					})
-						
-				
-
+	
 				const cssInfo = {styleHrefs, styles};
 				const jsInfo = {scriptSrcs, scripts}
 
 				return {css:cssInfo, js:jsInfo}
 			});
 
-
 			return {
-				assets:{
 					css:{
 						info:information.cssInfo,
 						sheets
@@ -133,21 +132,9 @@ export class CollectAssets extends Collect {
 						info:information.jsInfo,
 						scripts
 					}
-				}
-			}
-			/*
-			return [
 				
-				{
-				info: information.cssInfo,
-				sheets
-			},
-			{
-				info:information.jsInfo,
-				scripts
 			}
-			]
-			*/
+		
 		} catch (error) {
 			console.error('CSS-COLLECT', error);
 		}

@@ -18,7 +18,7 @@ declare global {
         }
 
         export interface Traces{
-            html:string[],
+            html:HtmlTrace[],
             css:CssTrace,
             js:JsTrace,
             transfer:TransferTrace,
@@ -27,12 +27,17 @@ declare global {
             media:MediaTrace
         }
 
+        export interface HtmlTrace{
+            html:string[]
+        }
+
         export interface MediaTrace{
             images:ImageFormat[]
+            lazyImages:string[]
         }
 
         export interface ImageFormat{
-            name:string
+            [key:string]:string
         }
         export interface GeneralTrace{
             console:ConsoleMessage[]
@@ -53,7 +58,7 @@ declare global {
         }
 
         export interface FontsTrace{
-            subfonts:SubfontFormat,
+            fonts:SubfontFormat,
 
         }
 
@@ -93,7 +98,13 @@ declare global {
     
 
         export interface CssTrace{
+            sheets:Sheets
             info:StyleInfo
+        }
+
+        export interface Sheets{
+            url:string,
+            text:string
         }
 
         export interface StyleInfo{
@@ -192,7 +203,7 @@ declare global {
         }
         export interface HostAddress{
             ip:string,
-            host:number
+            port:number
         }
 
         export interface CDPData{
