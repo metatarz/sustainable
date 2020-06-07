@@ -79,7 +79,7 @@ export class UsesFontSubsettingAudit extends Audit{
     }).filter((resource:any)=>{
 
         //TODO: compare fontnames to nonLocalFonts array
-        if(resource.fontSubsets.includes((font:any)=>font.hasSubset)){
+        if(resource.fontSubsets.some((font:any)=>font.hasSubset)){
             return true
         }
 
