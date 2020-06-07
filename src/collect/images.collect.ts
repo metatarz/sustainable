@@ -41,7 +41,7 @@ export class CollectImages extends Collect{
                   }
                   clearInterval(interval);
                   resolve();
-                }, 10);
+                }, 30);
               }));   
 
         const information = {
