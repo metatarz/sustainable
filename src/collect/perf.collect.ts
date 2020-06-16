@@ -1,20 +1,19 @@
-import Collect from './collect';
-import SystemMonitor from '../vendors/SystemMonitor';
-import { safeNavigateTimeout } from '../helpers/navigateTimeout';
+import {Collect} from './collect';
+import {safeNavigateTimeout} from '../helpers/navigateTimeout';
 
 export class CollectPerformance extends Collect {
-	static async afterPass(passContext: any): Promise<any> {
-		const {page, } = passContext;
-		await safeNavigateTimeout(page)
+	static async collect(passContext: any): Promise<any> {
+		const {page} = passContext;
+		await safeNavigateTimeout(page);
 		const perf = await page.evaluate(() => performance.toJSON());
-		const metrics = await page.metrics()
+		const metrics = await page.metrics();
 		const info = {
 			perf,
-			metrics,
-		}
+			metrics
+		};
 
 		return {
-			performance:info
-		}
+			performance: info
+		};
 	}
 }

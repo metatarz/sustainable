@@ -1,51 +1,37 @@
-import { safeReject } from "../helpers/safeReject"
+import {safeReject} from '../helpers/safeReject';
+import {TaskFunctionArguments} from '../types/cluster-options';
 
-export interface PassContext {
-	page: any;
-	data: {
-		url: string;
-	};
-}
+export class Collect {
+	collect(passContext: TaskFunctionArguments<string>): any {}
 
-export default class Collect {
-	beforePass(passContext: PassContext): any {}
-
-	atPass(passContext: PassContext): any {}
-
-	afterPass(passContext: PassContext): any {}
-
-	static parseAllSettled(data:any, audit?:boolean):any{
-
-
-		const parser = (res:any)=> {
-
-				if(res.status === 'fulfilled' && res.value){
-					return res.value
-				}else if(res.status === 'rejected'){
-					safeReject(new Error(`Failed with error: ${res.reason}`))
-				}
-	
+	static parseAllSettled(data: any, audit?: boolean): any {
+		const parser = (res: any) => {
+			if (res.status === 'fulfilled' && res.value) {
+				return res.value;
 			}
 
-			const result = data.map((res:any)=>{
-				return parser(res)
-			})
+			if (res.status === 'rejected') {
+				safeReject(new Error(`Failed with error: ${res.reason}`));
+			}
+		};
 
-			if(!audit){
-			return Object.assign({}, ...result)
-			}else{
-				return result.filter((data:any)=>data).flatMap((data:any)=>{
-				const isArray = Array.isArray(data)
-				if(isArray){
-					return data.map((d:any)=>d.value)
-				}
-				
-				return data
-				
-			})
+		const result = data.map((res: any) => {
+			return parser(res);
+		});
+
+		if (!audit) {
+			return Object.assign({}, ...result);
 		}
-			
-			
-	}
 
+		return result
+			.filter((data: any) => data)
+			.flatMap((data: any) => {
+				const isArray = Array.isArray(data);
+				if (isArray) {
+					return data.map((d: any) => d.value);
+				}
+
+				return data;
+			});
+	}
 }

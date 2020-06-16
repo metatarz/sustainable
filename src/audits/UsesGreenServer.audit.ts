@@ -1,60 +1,54 @@
-import Audit from "./audit";
-import { isGreenServerMem } from "../helpers/isGreenServer";
+import {Audit} from './audit';
+import {isGreenServerMem} from '../helpers/isGreenServer';
+import {URL} from 'url';
 
-export class UsesGreenServerAudit extends Audit{
-    static get meta(){
+export class UsesGreenServerAudit extends Audit {
+	static get meta() {
+		return {
+			id: 'greenserver',
+			title: `Server 100% renewable-powered`,
+			failureTitle: `Server running on fossil fuels`,
+			description: `It is important to make sure a server uses renewable-powered energy to host a website. Green hosting your website it is as easy as selecting a green web hosting provider.`,
+			category: 'server',
+			scoringType: 'server'
+		} as SA.Audit.Meta;
+	}
 
-        return {
-            id:'greenserver',
-            title:`Server 100% renewable-powered`,
-            failureTitle:`Server running on fossil fuels`,
-            description:`It is important to make sure a server uses renewable-powered energy to host a website. Green hosting your website it is as easy as selecting a green web hosting provider.`,
-            category:'server',
-            scoringType:'server'
-        } as SA.Audit.Meta
-    }
+	static async audit(
+		traces: SA.DataLog.Traces
+	): Promise<SA.Audit.Result | undefined> {
+		const {url} = traces;
+		const initialHost = new URL(url).hostname;
+		const hosts = new Set();
+		hosts.add(initialHost);
 
-    static async audit(traces:SA.DataLog.TransferTrace, url:string):Promise<SA.Audit.Result| undefined>{
+		const redirect = traces.redirect?.find(
+			record => new URL(record.url).hostname === initialHost
+		)?.redirectsTo;
 
-        const initialHost = new URL(url).hostname
-        //check for redirects in initial host
-        const hosts = new Set()
-        
-        hosts.add(initialHost)
+		if (redirect) {
+			hosts.add(new URL(redirect).hostname);
+		}
 
-        const redirect = traces.redirect?.find(record=>new URL(record.url).hostname===initialHost)?.redirectsTo
+		const ipAddress = traces.record.find(record => {
+			const hostname = new URL(record.response.url).hostname;
+			return Boolean(Array.from(hosts.values()).includes(hostname));
+		})?.response.remoteAddress.ip;
 
-        if(redirect){
-            hosts.add(new URL(redirect).hostname)
-        }
-        
+		const response = await isGreenServerMem(ipAddress!);
 
-        const ipAddress = traces.record.
-        find(record=>{
-            const hostname = new URL(record.response.url).hostname
-            return Array.from(hosts.values()).includes(hostname)?true:false
-        })?.response.remoteAddress.ip
-        
-        const response = await isGreenServerMem(ipAddress!)
-        
-        const {green, hostedby} = response!
+		const {green, hostedby} = response!;
 
-        const score = Number(green) || 0    
-        const meta = Audit.successOrFailureMeta(UsesGreenServerAudit.meta, score)
+		const score = Number(green) || 0;
+		const meta = Audit.successOrFailureMeta(UsesGreenServerAudit.meta, score);
 
-        return {
-            meta,
-            score,
-            scoreDisplayMode:'binary',
-            extendedInfo:{
-                value:{hostedby}
-            }
-
-        }
-
-        
-       
-    }
-
-        
+		return {
+			meta,
+			score,
+			scoreDisplayMode: 'binary',
+			extendedInfo: {
+				value: {hostedby}
+			}
+		};
+	}
 }

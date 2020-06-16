@@ -1,3 +1,19 @@
+import {UsesCompressionAudit} from '../audits/UsesCompression.audit';
+import {CollectTransfer} from '../collect/transfer.collect';
+import {CollectFailedTransfers} from '../collect/failed-transfer.collect';
+import {CollectRedirect} from '../collect/redirect.collect';
+import {CollectConsole} from '../collect/console.collect';
+import {CarbonFootprintAudit} from '../audits/CarbonFootprint.audit';
+import {UsesHTTP2Audit} from '../audits/UsesHTTP2.audit';
+import {UsesGreenServerAudit} from '../audits/UsesGreenServer.audit';
+import {UsesWebpImageFormatAudit} from '../audits/UsesWebpImageFormat.audit';
+import {NoConsoleLogsAudit} from '../audits/NoConsoleLogs.audit';
+import {CollectSubfont} from '../collect/subfont.collect';
+import {CollectAssets} from '../collect/assets.collect';
+import {CollectImages} from '../collect/images.collect';
+import {UsesFontSubsettingAudit} from '../audits/UsesFontSubsetting.audit';
+import {UsesLazyLoadingAudit} from '../audits/UsesLazyLoading.audit';
+
 export const DEFAULT: SA.Config.DefaultOptions = {
 	PUPPETEER_OPTIONS: {
 		concurrency: 2,
@@ -5,7 +21,6 @@ export const DEFAULT: SA.Config.DefaultOptions = {
 		workerCreationDelay: 0,
 		puppeteerOptions: {
 			headless: true,
-			// Devtools:true,
 			args: ['--disable-dev-shm-usage', '--shm-size=1gb']
 		},
 		perBrowserOptions: undefined,
@@ -15,12 +30,11 @@ export const DEFAULT: SA.Config.DefaultOptions = {
 		retryDelay: 0,
 		skipDuplicateUrls: false,
 		sameDomainDelay: 0,
-		puppeteer:undefined
+		puppeteer: undefined
 	},
-
 	CONNECTION_OPTIONS: {
-		maxThrottle:5000,
-		maxNavigationTime:30000,
+		maxThrottle: 5000,
+		maxNavigationTime: 30000,
 		emulatedDevices: [
 			{
 				name: 'Desktop 1920x1080',
@@ -78,76 +92,36 @@ export const DEFAULT: SA.Config.DefaultOptions = {
 		]
 	},
 	CATEGORIES: {
-		server:{description:'Server aspects which are essential for online sustainability: green hosting, carbon footprint, data transfer.'},
-		design:{description:'Hands-on the website assets that convert code to user-friendly content: images, css stylesheets, scripts, fonts.'}
+		server: {
+			description:
+				'Server aspects which are essential for online sustainability: green hosting, carbon footprint, data transfer.'
+		},
+		design: {
+			description:
+				'Hands-on the website assets that convert code to user-friendly content: images, css stylesheets, scripts, fonts.'
+		}
 	},
 	AUDITS: {
-
-		/*
-		JS: [
-			'minification',
-			'bundle',
-			'quotification',
-			'dependencies',
-			'complexity',
-			'coverage',
-			'tree_shaking'
+		collectors: [
+			CollectTransfer.collect,
+			CollectFailedTransfers.collect,
+			CollectRedirect.collect,
+			CollectConsole.collect,
+			CollectSubfont.collect,
+			CollectAssets.collect,
+			CollectImages.collect
 		],
-		CSS: ['minification', 'bundle', 'optimization', 'coverage'],
-
-		HTML: ['minification', 'inline_scripting', 'optimization'],
-
-		MEDIA: [
-			'images_limitation',
-			'images_compression',
-			'images_decorative',
-			'images_lazy',
-			'video_limitation',
-			'video_autoplay'
-		],
-
-		FONTS: ['webfonts_limitation', 'compression', 'webfonts_subsets'],
-
-		TRANSFER: [
-			'requests_limitation',
-			'redirects',
-			'resource_type',
-			'cacheability',
-			'transfer_size'
-		],
-
-		GENERAL: [
-			'carbon_footprint',
-			'console_logs',
-			'analytics'
-			// 'page_screenshot',
-		],
-		*/
-
-		SERVER: [
-			'performance',
-			'CDN',
-			'green_hosting',
-			'up-to-date',
-			'overhead_limitations',
-			'special_headers',
-			'http2',
-			'bot_blocking'
-		],
-
-		DESIGN : [
-			'images_limitation',
-			'images_compression',
-			'images_decorative',
-			'images_lazy',
-			'video_limitation',
-			'video_autoplay',
-			'webfonts_limitation', 
-			'compression', 
-			'webfonts_subsets'
+		audits: [
+			UsesCompressionAudit.audit,
+			CarbonFootprintAudit.audit,
+			UsesHTTP2Audit.audit,
+			UsesGreenServerAudit.audit,
+			UsesWebpImageFormatAudit.audit,
+			NoConsoleLogsAudit.audit,
+			UsesFontSubsettingAudit.audit,
+			UsesLazyLoadingAudit.audit
 		]
 	},
-
 	REPORT: {
 		scoringWeight: {
 			server: 0.23076923076923078,
@@ -158,10 +132,8 @@ export const DEFAULT: SA.Config.DefaultOptions = {
 			media: 0.15384615384615385,
 			transfer: 0.23076923076923078
 		},
-		scoring:{
-			CF:{median:4, p10:1.2, name:'Carbon Footprint'}
-		},
-		format: 'json',
-		webhook: ''
+		scoring: {
+			CF: {median: 4, p10: 1.2, name: 'Carbon Footprint'}
+		}
 	}
 };
