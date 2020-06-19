@@ -1,114 +1,117 @@
-import express = require('express')
-import {urlIsValid, headTestPassed} from './helpers/validUrl'
-import {Queue, QueueEvents} from 'bullmq'
-const Redis = require('ioredis')
+import {urlIsValid, headTestPassed} from './helpers/validUrl';
+import {Queue, QueueEvents} from 'bullmq';
 import Runner from './runner/runner';
-import { safeReject } from './helpers/safeReject';
-const bodyParser = require('body-parser')
+import {safeReject} from './helpers/safeReject';
+import express = require('express');
 
+const bodyParser = require('body-parser');
+const Redis = require('ioredis');
 
-export default class App{
+export default class App {
+	private readonly port: number = Number(process.env.PORT) || 7200;
+	private readonly runner: Runner = new Runner();
 
-    _port:number;
-    _runner:any;
+	async init() {
+		try {
+			const app = express();
+			app.use(bodyParser.urlencoded({extended: true}));
+			app.use(bodyParser.json());
+			app.listen(this.port, () =>
+				console.log('Server running on port :', this.port)
+			);
 
-    constructor(){
-        this._port = Number(process.env.PORT) || 7200
+			const queue = this.initRedis();
+			await this.runner.init();
+			this.listeners(app, queue);
+		} catch (error) {
+			safeReject(error);
+		}
+	}
 
-    }
+	private initRedis(): Queue {
+		const connection = new Redis();
+		const queue = new Queue('main', {connection});
+		this.queueEvents();
+		return queue;
+	}
 
-    async init(){
+	private queueEvents() {
+		const queueEvents = new QueueEvents('main');
+		queueEvents.on('waiting', ({jobId}) => {
+			console.log(`A job with ID ${jobId} is waiting`);
+		});
 
-        //launch express server
+		queueEvents.on('active', ({jobId, prev}) => {
+			console.log(`Job ${jobId} is now active; previous status was ${prev}`);
+		});
 
-        try{
-        const app = express()
-        app.use(bodyParser.urlencoded({extended: true}));
-        app.use(bodyParser.json());
-       
-        /*app.all('/*', function(req, res, next) {
- 	 res.header("Access-Control-Allow-Origin", "*");
- 	 res.header("Access-Control-Allow-Headers", "X-Requested-With, Content-Type, Accept");
- 	 res.header("Access-Control-Allow-Methods", "POST, GET");
- 	 next();
-	});       
-        */   
-        app.listen(this._port, ()=> console.log('Server running on port :', this._port))
+		queueEvents.on('completed', ({jobId, returnvalue}) => {
+			console.log(`${jobId} has completed and returned ${returnvalue}`);
+		});
 
-        //launch redis server
-        const connection = new Redis()
-        //launch new Queue
-        const queue = new Queue('main', {connection})
+		queueEvents.on('failed', ({jobId, failedReason}) => {
+			console.log(`${jobId} has failed with reason ${failedReason}`);
+		});
+	}
 
-        //launch runner
-        const runner=new Runner()
-        this._runner=runner
-        await runner.init()
-        //launch listeners
-        
-       this._listeners(app, queue)
-        }
-       catch(error){
-           safeReject(error)
-       }
+	private async gracefullyCloseServer(queue: Queue) {
+		await Promise.all([
+			queue.close(),
+			queue.disconnect(),
+			this.runner.shutdown()
+		]);
+	}
 
-    }
+	private listeners(app: express.Application, queue: Queue): void {
+		const queueEvents = new QueueEvents('main');
 
-    _listeners(app:express.Application, queue:Queue){
+		app.get('/health', (_, res) => {
+			res.sendStatus(200);
+		});
 
-        const queueEvents = new QueueEvents('main')
+		app.post(
+			'/service/add',
+			async (request, res): Promise<any> => {
+				let {url} = request.body;
 
-        app.get('/health', (_,res)=>{
-            res.sendStatus(200)
-        })
-        app.post('/service/add', async (req,res) => {
-            let {url} = req.body
-            url=url.trim()
-            
-            if(typeof url !== 'string' || !urlIsValid(url)){
-                return res.status(400).send({status:'Error invalid URL'})
-            }
-            if(!url.startsWith('http')){
-                url='https://'+url
-            }
+				if (typeof url === 'string') {
+					url = url.trim();
+				}
 
-            if(await headTestPassed(url)){
+				if (typeof url !== 'string' || !urlIsValid(url)) {
+					return res.status(400).send({status: 'Error invalid URL'});
+				}
 
-            
-            const job = await queue.add('audit', {
-                url:url
-            })
+				if (!url.startsWith('http')) {
+					url = 'https://' + url;
+				}
 
-            const _jobId = job.id
-  
+				const isValidHeadRequest = await headTestPassed(url);
 
-            queueEvents.on('completed', ({ jobId, returnvalue }) => {
-                if(_jobId ===jobId){
-                    res.status(200).send({...returnvalue})
-                }
-            });
-            queueEvents.on('failed', ({ jobId, failedReason }) => {
-                if(_jobId === jobId){
-                    res.send(500).json(failedReason)
-                }
-			    
-            });
-        }else{
-            return res.status(400).send({status:'Error unknown URL'})
-        }
+				if (isValidHeadRequest) {
+					const job = await queue.add('audit', {
+						url
+					});
+					const _jobId = job.id;
+					queueEvents.on('completed', ({jobId, returnvalue}) => {
+						if (_jobId === jobId) {
+							res.status(200).send({...returnvalue});
+						}
+					});
+					queueEvents.on('failed', ({jobId, failedReason}) => {
+						if (_jobId === jobId) {
+							res.send(500).json(failedReason);
+						}
+					});
+				} else {
+					return res.status(400).send({status: 'Error unknown URL'});
+				}
+			}
+		);
 
-         })
-
-         app.get('/service/close', async (req,res)=>{
-             //gracefully close
-             await Promise.all([
-                 queue.close(),
-                  queue.disconnect(),
-                   this._runner.shutdown()
-                ])
-
-             res.sendStatus(200)
-         })
-        
-    }
+		app.get('/service/close', async (_, res) => {
+			this.gracefullyCloseServer(queue);
+			res.sendStatus(200);
+		});
+	}
 }

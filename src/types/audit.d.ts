@@ -1,51 +1,69 @@
+declare global {
+	namespace SA.Audit {
+		export interface Meta {
+			/** String identifier of the audit */
+			id: string;
+			/** Short successful audit title */
+			title?: string;
+			/** Short failed audit title */
+			failureTitle?: string;
+			/** Audit description, showcasinng importance and useful information */
+			description: string;
+			/** Audit category: Server or Design */
+			category: 'server' | 'design';
+			/** Traces names this audit requires */
+			scoringType: ScoreWeights;
+		}
+		export type ScoreDisplayModes = 'numeric' | 'binary' | 'manual';
 
-declare global{
-    module SA.Audit{
-        export interface Meta{
-            /** string identifier of the audit */
-           
-            id:string,
-             /** short successful audit title */
-            title?:string,
-            /** short failed audit title */
-            failureTitle?:string,
-            /** Audit description, showcasinng importance and useful information */
-            description:string,
-            /** Audit category: Server or Design */
-            category:"server" | "design",
-            /** Traces names this audit requires */
-            scoringType:ScoreWeights,
+		export type ScoreDisplayMode = ScoreDisplayModes[keyof ScoreDisplayModes];
 
+		export type ScoreWeights =
+			| 'transfer'
+			| 'general'
+			| 'media'
+			| 'html'
+			| 'js'
+			| 'server'
+			| 'fonts';
 
-        }
-        export type ScoreDisplayModes = 
-        'numeric'|'binary'|'manual'
-    
-        export type ScoreDisplayMode = Audit.ScoreDisplayModes[keyof Audit.ScoreDisplayModes];
+		export interface Result {
+			score: number;
+			scoreDisplayMode: ScoreDisplayMode;
+			meta: Meta;
+			extendedInfo?: {value: ExtendedInfo};
+			errorMessage?: string;
+		}
 
-        export type ScoreWeights = 
-        'transfer' | 'general' | 'media' | 'html' | 'js' | 'server' | 'fonts'
+		export interface ExtendedInfo {
+			[key: string]: any;
+		}
 
-        export interface Result{
+		export interface AuditsByCategory {
+			category: AuditCategoryAndDescription;
+			score: number | null;
+			audits: AuditByFailOrPass;
+		}
 
-            score:number | null,
-            scoreDisplayMode:ScoreDisplayMode,
-            meta:Meta
-            extendedInfo?:{value:ExtendedInfo},
-            errorMessage?:string,
+		export interface AuditCategoryAndDescription {
+			name: 'server' | 'design';
+			description: string;
+		}
 
-        }
+		export interface AuditByFailOrPass {
+			pass: AuditReportFormat[];
+			fail: AuditReportFormat[];
+		}
 
-        export interface ExtendedInfo{
-            [key:string]:any
-        }
-        /**
-         * Numeric [0,1]
-         * Binary 0 Failed, 1 Passed
-         * Manual Requires the user for manual checking
-         */
-   
-    }
+		export interface AuditReportFormat {
+			title: string;
+			score: number;
+			scoreDisplayMode: ScoreDisplayMode;
+			meta: Meta;
+			extendedInfo?: {value: ExtendedInfo};
+			errorMessage?: string;
+		}
+	}
 }
 
-export{}
+export {};

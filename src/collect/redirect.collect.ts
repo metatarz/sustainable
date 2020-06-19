@@ -1,8 +1,8 @@
-import Collect from './collect';
-import { safeNavigateTimeout } from '../helpers/navigateTimeout';
+import {Collect} from './collect';
+import {safeNavigateTimeout} from '../helpers/navigateTimeout';
 
 export class CollectRedirect extends Collect {
-	static async atPass(passContext: any): Promise<any> {
+	static async collect(passContext: any): Promise<any> {
 		const results: any = [];
 		const {page} = passContext;
 		page.on('response', (response: any) => {
@@ -17,8 +17,12 @@ export class CollectRedirect extends Collect {
 					response.headers().location,
 					url
 				).toString();
-				const information = {requestId:response._request._requestId, 
-					url, redirectsTo, redirectChain: response._request._redirectChain};
+				const information = {
+					requestId: response._request._requestId,
+					url,
+					redirectsTo,
+					redirectChain: response._request._redirectChain
+				};
 
 				results.push(information);
 			}
@@ -26,10 +30,10 @@ export class CollectRedirect extends Collect {
 		try {
 			console.log('waiting for navigation to load');
 
-			await safeNavigateTimeout(page, 'networkidle0')
+			await safeNavigateTimeout(page, 'networkidle0');
 			return {
-				 redirect:results
-			}
+				redirect: results
+			};
 		} catch (error) {
 			console.log('Redirect-Collect', error);
 		}

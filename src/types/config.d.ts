@@ -1,38 +1,52 @@
-import {ClusterOptions} from './cluster-options.interface';
+import {ClusterOptions, TaskFunctionArguments} from './cluster-options';
+import {Collect, PassContext} from '../collect/collect';
+import {Audit} from '../audits/audit';
+import {CollectTransfer} from '../collect/transfer.collect';
 
 declare global {
 	namespace SA {
 		namespace Config {
 			export interface DefaultOptions {
 				PUPPETEER_OPTIONS: ClusterOptions;
-				CONNECTION_OPTIONS: {
-					maxThrottle:number,
-					maxNavigationTime:number,
-					emulatedDevices: EmulatedDevice[];
-					locations: EmulatedLocation[];
+				CONNECTION_OPTIONS: ConnectionOptions;
+				CATEGORIES: {
+					server: {description: string};
+					design: {description: string};
 				};
-				CATEGORIES:{
-					server:{description:string},
-					design:{description:string}
-				} 
-				AUDITS: {
-					SERVER: string[];
-					DESIGN: string[]
-				};
+				AUDITS: CollectorAndAudit;
 				REPORT: {
 					scoringWeight: {[key: string]: number};
-					scoring:Scoring
+					scoring: Scoring;
 					format?: string;
 					webhook?: string;
 				};
 			}
 
-			export interface Scoring{
-				[key:string]:{
-				median:number,
-				p10:number,
-				name:string
-				}
+			export interface CollectorAndAudit {
+				collectors: CollectorFunction[];
+				audits: AuditFunction[];
+			}
+
+			type CollectorFunction = (
+				passContext: TaskFunctionArguments<any>
+			) => Promise<any>;
+			type AuditFunction = (
+				parsedTraces: any
+			) => Promise<SA.Audit.Result | undefined> | SA.Audit.Result | undefined;
+
+			export interface ConnectionOptions {
+				maxThrottle: number;
+				maxNavigationTime: number;
+				emulatedDevices: EmulatedDevice[];
+				locations: EmulatedLocation[];
+			}
+
+			export interface Scoring {
+				[key: string]: {
+					median: number;
+					p10: number;
+					name: string;
+				};
 			}
 			export interface EmulatedDevice {
 				name: string;
@@ -51,19 +65,7 @@ declare global {
 				width: number;
 				height: number;
 			}
-
-			export interface Audit {
-				JS: 'JS';
-				CSS: 'CSS';
-				HTML: 'HTML';
-				MEDIA: 'MEDIA';
-				FONTS: 'FONTS';
-				TRANSFER: 'TRANSFER';
-				GENERAL: 'GENERAL';
-				SERVER: 'SERVER';
-			}
-			
 		}
 	}
 }
-export{}
+export {};

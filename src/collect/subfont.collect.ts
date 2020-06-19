@@ -1,13 +1,12 @@
-import Collect from './collect';
-import { safeNavigateTimeout } from '../helpers/navigateTimeout';
+import {Collect} from './collect';
+import {safeNavigateTimeout} from '../helpers/navigateTimeout';
 
 export class CollectSubfont extends Collect {
-	static async afterPass(passContext: any, options?: any): Promise<any> {
+	static async collect(passContext: any, options?: any): Promise<any> {
 		try {
-
-			//may be interesting to give a try at Page._client.FontFamilies
+			// May be interesting to give a try at Page._client.FontFamilies
 			const {page} = passContext;
-			await safeNavigateTimeout(page)
+			await safeNavigateTimeout(page);
 			const result = await page.evaluate(function(options_: any) {
 				try {
 					// @ts-ignore
@@ -20,11 +19,11 @@ export class CollectSubfont extends Collect {
 					console.error(error.message);
 				}
 			}, options);
-			
+
+
 			return {
-				fonts:result
-			}
-			
+				fonts: result
+			};
 		} catch (error) {
 			console.error('Subfont-collect', error);
 		}

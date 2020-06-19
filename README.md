@@ -1,5 +1,5 @@
 # Website Sustainability Audits
-  Currently in beta release. Test your website at [sustainability](https://susaudits.web.app/).
+  Currently in beta release. Test your website at [sustainability](https://susaudits.web.app/) (with environmental awareness)
 
 ## Instructions to run locally
 

@@ -1,5 +1,5 @@
-import { ConcurrencyImplementationClassType } from "puppeteer-cluster/dist/concurrency/ConcurrencyImplementation";
-import { LaunchOptions } from "puppeteer";
+import {ConcurrencyImplementationClassType} from 'puppeteer-cluster/dist/concurrency/ConcurrencyImplementation';
+import {LaunchOptions, Page} from 'puppeteer';
 
 export interface ClusterOptions {
 	concurrency: number | ConcurrencyImplementationClassType;
@@ -14,4 +14,17 @@ export interface ClusterOptions {
 	skipDuplicateUrls: boolean;
 	sameDomainDelay: number;
 	puppeteer: any;
+}
+
+export interface Tracker {
+	urls(): void;
+	dispose(): void;
+}
+
+export interface TaskFunctionArguments<JobData> {
+	page: Page;
+	data: JobData;
+	worker: {
+		id: number;
+	};
 }

@@ -1,13 +1,13 @@
-import Collect from './collect';
-import fs from 'fs';
+import {Collect} from './collect';
+import fs = require('fs');
 
 export class CollectHTML extends Collect {
-	static async afterPass(passContext: any, options?: any): Promise<any> {
+	static async collect(passContext: any, options?: any): Promise<any> {
 		try {
 			const {page} = passContext;
 			const result = [];
 
-			await page.waitForSelector('body')
+			await page.waitForSelector('body');
 			const javascriptHtml = await page.evaluate(
 				() => document.querySelector('*')!.outerHTML
 			);
@@ -16,9 +16,7 @@ export class CollectHTML extends Collect {
 			if (vanillaHtml === javascriptHtml) {
 				result.push(javascriptHtml);
 			} else if (vanillaHtml !== javascriptHtml) {
-				result.push(
-					javascriptHtml, vanillaHtml
-				);
+				result.push(javascriptHtml, vanillaHtml);
 			}
 
 			if (options.production) {
@@ -33,12 +31,10 @@ export class CollectHTML extends Collect {
 					}
 				);
 			}
-		
-			
+
 			return {
-				html:result
-			}
-			
+				html: result
+			};
 		} catch (error) {
 			console.error('HTML-COLLECT', error);
 		}

@@ -6,24 +6,26 @@
  */
 import {DEFAULT} from '../config/configuration';
 import {Cluster} from 'puppeteer-cluster';
+import {ClusterOptions} from '../types/cluster-options';
 
 export default class Connection {
-	_options = DEFAULT.PUPPETEER_OPTIONS;
-	_cluster!: Cluster;
-	async setUp(options?: any) {
+	private options = DEFAULT.PUPPETEER_OPTIONS;
+	private cluster: Cluster = {} as Cluster;
+
+	async setUp(options?: ClusterOptions): Promise<any> {
 		try {
 			if (options) {
-				this._options = options;
+				this.options = options;
 			}
 
-			this._cluster = await Cluster.launch(this._options);			
-			this._cluster.on('taskerror', (err, data) => {
+			this.cluster = await Cluster.launch(this.options);
+			this.cluster.on('taskerror', (err, data) => {
 				throw new Error(`Error crawling ${data}: ${err.message}`);
 			});
-			return this._cluster;
+			return this.cluster;
 		} catch (error) {
 			console.error(error);
-			await this._cluster.close();
+			await this.cluster.close();
 		}
 	}
 }
