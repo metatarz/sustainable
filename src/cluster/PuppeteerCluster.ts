@@ -8,7 +8,7 @@ import {DEFAULT} from '../config/configuration';
 import {Cluster} from 'puppeteer-cluster';
 import {ClusterOptions} from '../types/cluster-options';
 
-export default class Connection {
+class PuppeteerCluster {
 	private options = DEFAULT.PUPPETEER_OPTIONS;
 	private cluster: Cluster = {} as Cluster;
 
@@ -29,3 +29,5 @@ export default class Connection {
 		}
 	}
 }
+
+export default new PuppeteerCluster();

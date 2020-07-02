@@ -16,15 +16,7 @@ export interface ClusterOptions {
 	puppeteer: any;
 }
 
-export interface Tracker {
-	urls(): void;
-	dispose(): void;
-}
-
 export interface TaskFunctionArguments<JobData> {
 	page: Page;
 	data: JobData;
-	worker: {
-		id: number;
-	};
 }

@@ -1,7 +1,6 @@
 import {urlIsValid, headTestPassed} from './helpers/validUrl';
 import {Queue, QueueEvents} from 'bullmq';
 import Runner from './runner/runner';
-import {safeReject} from './helpers/safeReject';
 import express = require('express');
 
 const bodyParser = require('body-parser');
@@ -24,7 +23,7 @@ export default class App {
 			await this.runner.init();
 			this.listeners(app, queue);
 		} catch (error) {
-			safeReject(error);
+			console.log(error);
 		}
 	}
 

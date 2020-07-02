@@ -1,19 +1,15 @@
-import Connection from '../connection/connection';
-import {Commander} from '../collect/commander';
-import {generate} from '../helpers/uuid-generator';
-import {safeReject} from '../helpers/safeReject';
+import PuppeteerCluster from '../cluster/PuppeteerCluster';
 import {Worker} from 'bullmq';
 import {Cluster} from 'puppeteer-cluster';
 import {DEFAULT} from '../config/configuration';
-import {Collect} from '../collect/collect';
-import {Audit} from '../audits/audit';
+import {TaskFunctionArguments} from '../types/cluster-options';
+import {Sustainability} from 'sustainability';
 
 export default class Runner {
 	private cluster: Cluster = {} as Cluster;
 
 	async init() {
-		const connection = new Connection();
-		this.cluster = await connection.setUp();
+		this.cluster = await PuppeteerCluster.setUp();
 		this.run();
 	}
 
@@ -23,13 +19,13 @@ export default class Runner {
 			async job => {
 				try {
 					const {url} = job.data;
-					const result = await this.cluster.execute(
+					const report = await this.cluster.execute(
 						url,
 						this.handler.bind(this)
 					);
-					return result;
+					return report;
 				} catch (error) {
-					safeReject(error);
+					console.log(error);
 				}
 			},
 			{concurrency: DEFAULT.PUPPETEER_OPTIONS.maxConcurrency}
@@ -47,40 +43,15 @@ export default class Runner {
 				throw new Error('Unhandled Rejection at Promise');
 			});
 		} catch (error) {
-			safeReject(error);
+			console.log(error);
 		} finally {
 			process.exit(1);
 		}
 	}
 
-	async handler(passContextRaw: any) {
-		const startTime = Date.now();
-		const commander = new Commander();
+	async handler(passContextRaw: TaskFunctionArguments<string>) {
+		const {page, data: url} = passContextRaw;
 
-		const projectId = generate();
-		const {_, data: url} = passContextRaw;
-		const _page = await commander.setUp(passContextRaw, this.cluster);
-		const passContext = {...passContextRaw, page: _page, data: url};
-
-		// @ts-ignore allSettled lacks typescript support
-		const results = await Promise.allSettled([
-			commander.navigate(_page, url),
-			commander.asyncEvaluate(passContext)
-		]);
-
-		const resultsParsed = Collect.parseAllSettled(results, true);
-		const audits = Audit.groupAudits(resultsParsed);
-		const globalScore = Audit.computeScore(audits);
-
-		const meta = {
-			id: projectId,
-			url,
-			timing: [startTime, Date.now()]
-		};
-		return {
-			globalScore,
-			meta,
-			audits
-		};
+		return Sustainability.audit(url);
 	}
 }
