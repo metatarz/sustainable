@@ -17,6 +17,7 @@ export const DEFAULT: SA.Config.DefaultOptions = {
 		puppeteer: undefined
 	},
 	CONNECTION_OPTIONS: {
-		maxThrottle: 5000
+		maxThrottle: 5000,
+		maxNavigationTime:15000
 	}
 };

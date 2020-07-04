@@ -73,6 +73,7 @@ export default class App {
 			async (request, res): Promise<any> => {
 				let {url} = request.body;
 
+
 				if (typeof url === 'string') {
 					url = url.trim();
 				}

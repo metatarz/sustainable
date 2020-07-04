@@ -49,9 +49,11 @@ export default class Runner {
 		}
 	}
 
-	async handler(passContextRaw: TaskFunctionArguments<string>) {
+	handler(passContextRaw: TaskFunctionArguments<string>) {
 		const {page, data: url} = passContextRaw;
-
-		return Sustainability.audit(url);
+		const connectionSettings = {
+			maxNavigationTime:DEFAULT.CONNECTION_OPTIONS.maxNavigationTime
+		}
+		return Sustainability.audit(url, {page, connectionSettings:{maxNavigationTime:5000}});
 	}
 }

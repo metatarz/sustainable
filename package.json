@@ -38,7 +38,7 @@
     "node-fetch": "^2.6.0",
     "puppeteer": "^3.1.0",
     "puppeteer-cluster": "^0.20.0",
-    "sustainability": "^0.2.4"
+    "sustainability": "file:../npm/sustainability"
   },
   "xo": {
     "prettier": "true"
