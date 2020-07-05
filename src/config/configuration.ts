@@ -18,6 +18,6 @@ export const DEFAULT: SA.Config.DefaultOptions = {
 	},
 	CONNECTION_OPTIONS: {
 		maxThrottle: 5000,
-		maxNavigationTime:15000
+		maxNavigationTime: 15000
 	}
 };

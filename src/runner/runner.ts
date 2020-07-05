@@ -52,8 +52,8 @@ export default class Runner {
 	handler(passContextRaw: TaskFunctionArguments<string>) {
 		const {page, data: url} = passContextRaw;
 		const connectionSettings = {
-			maxNavigationTime:DEFAULT.CONNECTION_OPTIONS.maxNavigationTime
-		}
-		return Sustainability.audit(url, {page, connectionSettings:{maxNavigationTime:5000}});
+			maxNavigationTime: DEFAULT.CONNECTION_OPTIONS.maxNavigationTime
+		};
+		return Sustainability.audit(url, {page, connectionSettings});
 	}
 }

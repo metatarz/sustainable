@@ -11,10 +11,10 @@ declare global {
 				CONNECTION_OPTIONS: ConnectionOptions;
 			}
 			export interface ConnectionOptions {
-        maxNavigationTime: number;
+				maxNavigationTime: number;
 				maxThrottle: number;
+			}
 		}
 	}
-}
 }
 export {};
