@@ -3,7 +3,7 @@ import {Worker} from 'bullmq';
 import {Cluster} from 'puppeteer-cluster';
 import {DEFAULT} from '../config/configuration';
 import {TaskFunctionArguments} from '../types/cluster-options';
-import {Sustainability} from 'sustainability';
+import {Sustainability} from 'sustainability'
 
 export default class Runner {
 	private cluster: Cluster = {} as Cluster;

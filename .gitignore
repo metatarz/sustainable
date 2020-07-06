@@ -5,3 +5,4 @@ notes.txt
 docker-compose.yml
 Dockerfile
 nginx.conf
+default.conf
