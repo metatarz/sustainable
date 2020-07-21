@@ -65,7 +65,8 @@ export default class App {
 		const queueEvents = new QueueEvents('main');
 
 		app.get('/health', (_, res) => {
-			res.sendStatus(200);
+			res.json({"schemaVersion":1,"label":"website", "message":"up", "color":"green", "cacheSeconds":3600});
+
 		});
 
 		app.post(
