@@ -8,8 +8,8 @@ It uses BullMQ for queueing jobs, Puppeteer-Cluster for creating a cluster of pu
 ## Instructions to run locally
 
 <details><summary>Using docker-compose (recommended):</summary>
-1. Git clone the master branch
-2. Run `docker-compose up -d`
+1. Git clone the master branch <br/>
+2. Run `docker-compose up -d` <br/>
 
 - Audit any URL with a POST request at localhost/service/add including a JSON body param `url` containing the corresponding URL to audit.
 
