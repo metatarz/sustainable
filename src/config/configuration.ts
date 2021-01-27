@@ -5,7 +5,7 @@ export const DEFAULT: SA.Config.DefaultOptions = {
 		workerCreationDelay: 0,
 		puppeteerOptions: {
 			headless: true,
-			args: ['--disable-dev-shm-usage', '--shm-size=1gb']
+			args: ['--disable-dev-shm-usage', '--disable-setuid-sandbox', '--no-sandbox']
 		},
 		perBrowserOptions: undefined,
 		monitor: true,

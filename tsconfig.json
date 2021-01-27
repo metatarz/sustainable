@@ -14,7 +14,8 @@
       "inlineSourceMap": true,
       "noImplicitReturns":true,
       "declaration": true,
-      "skipLibCheck":true
+      "skipLibCheck":true,
+      "allowSyntheticDefaultImports":true
     },
     "include": [
         "./src/**/*"

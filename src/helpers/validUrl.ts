@@ -1,5 +1,5 @@
 import fetch from 'node-fetch';
-import {DEFAULT} from '../config/configuration';
+import { DEFAULT } from '../config/configuration';
 import AbortController from 'abort-controller';
 
 export function urlIsValid(url: string) {
@@ -34,7 +34,7 @@ export async function headTestPassed(url: string) {
 	const controller = new AbortController();
 	const timeout = setTimeout(() => {
 		controller.abort();
-	}, DEFAULT.CONNECTION_OPTIONS.maxThrottle);
+	}, DEFAULT.CONNECTION_OPTIONS.maxThrottle + 15000);
 
 	try {
 		const response = await fetch(url, {

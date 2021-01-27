@@ -1,12 +1,13 @@
 import PuppeteerCluster from '../cluster/PuppeteerCluster';
-import {Worker} from 'bullmq';
-import {Cluster} from 'puppeteer-cluster';
-import {DEFAULT} from '../config/configuration';
-import {TaskFunctionArguments} from '../types/cluster-options';
-import {Sustainability} from 'sustainability'
+import { Worker } from 'bullmq';
+import { Cluster } from 'puppeteer-cluster';
+import { DEFAULT } from '../config/configuration';
+import { TaskFunctionArguments } from '../types/cluster-options';
+import { Sustainability } from 'sustainability'
 
 export default class Runner {
 	private cluster: Cluster = {} as Cluster;
+	private redisHost = process.env.REDIS_HOST
 
 	async init() {
 		this.cluster = await PuppeteerCluster.setUp();
@@ -18,7 +19,7 @@ export default class Runner {
 			'main',
 			async job => {
 				try {
-					const {url} = job.data;
+					const { url } = job.data;
 					const report = await this.cluster.execute(
 						url,
 						this.handler.bind(this)
@@ -28,7 +29,7 @@ export default class Runner {
 					console.log(error);
 				}
 			},
-			{concurrency: DEFAULT.PUPPETEER_OPTIONS.maxConcurrency}
+			{ concurrency: DEFAULT.PUPPETEER_OPTIONS.maxConcurrency, connection: { host: this.redisHost } }
 		);
 	}
 
@@ -50,10 +51,21 @@ export default class Runner {
 	}
 
 	handler(passContextRaw: TaskFunctionArguments<string>) {
-		const {page, data: url} = passContextRaw;
+		const { page, data: url } = passContextRaw;
+		const browser = page.browser()
 		const connectionSettings = {
 			maxNavigationTime: DEFAULT.CONNECTION_OPTIONS.maxNavigationTime
 		};
-		return Sustainability.audit(url, {page, connectionSettings});
+
+		const launchSettings = {
+			args: [
+				'--disable-setuid-sandbox',
+				'--no-sandbox',
+				'--disable-dev-shm-usage'
+			]
+		}
+
+
+		return Sustainability.audit(url, { browser, connectionSettings, launchSettings });
 	}
 }
