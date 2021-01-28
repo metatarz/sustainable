@@ -11,6 +11,7 @@ services:
     environment:
       - NODE_ENV=production
       - REDIS_HOST=redis
+      - REDIS_PORT=6379
   redis:
     image: "redis:latest"
     restart: always
@@ -20,6 +21,8 @@ services:
     build:
       context: ./nginx
     restart: always
+    depends_on:
+      - das
     ports:
       - "80:80"
     networks:

@@ -8,7 +8,8 @@ const bodyParser = require('body-parser');
 export default class App {
 	private readonly port: number = Number(process.env.PORT) || 7200;
 	private readonly runner: Runner = new Runner();
-	private redisHost = process.env.REDIS_HOST
+	private redisHost = process.env.REDIS_HOST || "127.0.0.1"
+	private redisPort = process.env.REDIS_PORT || "6379"
 
 	async init() {
 		try {
@@ -31,7 +32,7 @@ export default class App {
 	private initRedis(): Queue {
 
 		const queue = new Queue('main', {
-			connection: { host: this.redisHost }
+			connection: { host: this.redisHost, port: +this.redisPort }
 		});
 		this.queueEvents();
 		return queue;
@@ -40,7 +41,7 @@ export default class App {
 
 	private queueEvents() {
 		const queueEvents = new QueueEvents('main', {
-			connection: { host: this.redisHost }
+			connection: { host: this.redisHost, port: +this.redisPort }
 
 
 		});
@@ -71,7 +72,7 @@ export default class App {
 
 	private listeners(app: express.Application, queue: Queue): void {
 		const queueEvents = new QueueEvents('main', {
-			connection: { host: this.redisHost }
+			connection: { host: this.redisHost, port: +this.redisPort}	
 
 		});
 

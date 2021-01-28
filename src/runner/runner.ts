@@ -7,7 +7,8 @@ import { Sustainability } from 'sustainability'
 
 export default class Runner {
 	private cluster: Cluster = {} as Cluster;
-	private redisHost = process.env.REDIS_HOST
+	private redisHost = process.env.REDIS_HOST || "127.0.0.1"
+	private redisPort = process.env.REDIS_PORT || "6379"
 
 	async init() {
 		this.cluster = await PuppeteerCluster.setUp();
@@ -29,7 +30,7 @@ export default class Runner {
 					console.log(error);
 				}
 			},
-			{ concurrency: DEFAULT.PUPPETEER_OPTIONS.maxConcurrency, connection: { host: this.redisHost } }
+			{ concurrency: DEFAULT.PUPPETEER_OPTIONS.maxConcurrency, connection: { host: this.redisHost, port: +this.redisPort } }
 		);
 	}
 
