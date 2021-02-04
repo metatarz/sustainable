@@ -28,27 +28,11 @@ export default class Runner {
 					return report;
 				} catch (error) {
 					console.log(error);
+					return undefined
 				}
 			},
 			{ concurrency: DEFAULT.PUPPETEER_OPTIONS.maxConcurrency, connection: { host: this.redisHost, port: +this.redisPort } }
 		);
-	}
-
-	async shutdown() {
-		try {
-			const cluster = this.cluster;
-			await cluster.idle();
-			await cluster.close();
-
-			process.on('unhandledRejection', async (reason, p) => {
-				console.error(reason, p);
-				throw new Error('Unhandled Rejection at Promise');
-			});
-		} catch (error) {
-			console.log(error);
-		} finally {
-			process.exit(1);
-		}
 	}
 
 	handler(passContextRaw: TaskFunctionArguments<string>) {

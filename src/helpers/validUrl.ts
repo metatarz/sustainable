@@ -23,37 +23,3 @@ export function urlIsValid(url: string) {
 	return true;
 }
 
-/**
- * This function makes HTTP HEAD request to url to see if it is
- * reachable and prevents slow network issues
- * @param url string
- */
-
-export async function headTestPassed(url: string) {
-	// Set abortsignal to abort request long than maxThrottle
-	const controller = new AbortController();
-	const timeout = setTimeout(() => {
-		controller.abort();
-	}, DEFAULT.CONNECTION_OPTIONS.maxThrottle + 15000);
-
-	try {
-		const response = await fetch(url, {
-			method: 'HEAD',
-			signal: controller.signal
-		});
-
-		if (response) {
-			const status = response.status;
-			if (status >= 200 && status <= 299) {
-				return true;
-			}
-		}
-
-		return false;
-	} catch (error) {
-		console.log(error);
-		return false;
-	} finally {
-		clearTimeout(timeout);
-	}
-}

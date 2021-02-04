@@ -1,4 +1,4 @@
-import { urlIsValid, headTestPassed } from './helpers/validUrl';
+import { urlIsValid } from './helpers/validUrl';
 import { Queue, QueueEvents } from 'bullmq';
 import Runner from './runner/runner';
 import express = require('express');
@@ -62,17 +62,9 @@ export default class App {
 		});
 	}
 
-	private async gracefullyCloseServer(queue: Queue) {
-		await Promise.all([
-			queue.close(),
-			queue.disconnect(),
-			this.runner.shutdown()
-		]);
-	}
-
 	private listeners(app: express.Application, queue: Queue): void {
 		const queueEvents = new QueueEvents('main', {
-			connection: { host: this.redisHost, port: +this.redisPort}	
+			connection: { host: this.redisHost, port: +this.redisPort }
 
 		});
 
@@ -91,10 +83,7 @@ export default class App {
 				if (!url.startsWith('http')) {
 					url = 'https://' + url;
 				}
-
-				const isValidHeadRequest = await headTestPassed(url);
-
-				if (isValidHeadRequest) {
+				try {
 					const job = await queue.add('audit', {
 						url
 					});
@@ -109,15 +98,13 @@ export default class App {
 							res.send(500).json(failedReason);
 						}
 					});
-				} else {
+				} catch (e) {
 					return res.status(400).send({ status: 'Error unknown URL' });
+
 				}
+
+
 			}
 		);
-
-		app.get('/service/close', async (_, res) => {
-			this.gracefullyCloseServer(queue);
-			res.sendStatus(200);
-		});
 	}
 }
