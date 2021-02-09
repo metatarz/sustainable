@@ -1,7 +1,3 @@
-import fetch from 'node-fetch';
-import { DEFAULT } from '../config/configuration';
-import AbortController from 'abort-controller';
-
 export function urlIsValid(url: string) {
 	const regexp = new RegExp(
 		/(https?:\/\/)?[\w\-~]+(\.[\w\-~]+)+(\/[\w\-~]*)*(#[\w\-]*)?(\?.*)?/
