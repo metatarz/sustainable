@@ -34,7 +34,9 @@ export default class App {
 		const queue = new Queue('main', {
 			connection: { host: this.redisHost, port: +this.redisPort }
 		});
-		this.queueEvents();
+		if (process.env.NODE_ENV !== 'production') {
+			this.queueEvents();
+		}
 		return queue;
 	}
 

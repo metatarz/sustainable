@@ -8,7 +8,7 @@ export const DEFAULT: SA.Config.DefaultOptions = {
 			args: ['--disable-dev-shm-usage', '--disable-setuid-sandbox', '--no-sandbox']
 		},
 		perBrowserOptions: undefined,
-		monitor: true,
+		monitor: process.env.NODE_ENV !== 'production',
 		timeout: 90 * 1000,
 		retryLimit: 0,
 		retryDelay: 0,
