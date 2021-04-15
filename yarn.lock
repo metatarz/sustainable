@@ -6520,10 +6520,10 @@ supports-hyperlinks@^2.0.0:
     has-flag "^4.0.0"
     supports-color "^7.0.0"
 
-sustainability@0.4.11:
-  version "0.4.11"
-  resolved "https://registry.yarnpkg.com/sustainability/-/sustainability-0.4.11.tgz#0d4d9e885ce95662ddb35de4ba56a28059366f8a"
-  integrity sha512-O9DdrGJ/gQzgKTvx7qdxTYYwJxZuRtlB7CWN8yH32eyLh+urgpvNsbhsAC7bQNiNkfn8A//BYTpUg28Rm2ZrVA==
+sustainability@0.4.12:
+  version "0.4.12"
+  resolved "https://registry.yarnpkg.com/sustainability/-/sustainability-0.4.12.tgz#0f08d90b25cf27053fbd3e062a9dc1c24885e0ec"
+  integrity sha512-GB3ivg5OKzAAF7T1LXmUrb4o8Swu81BWWVKNLdrxg/9RsAI4PSi9jJZJXeEMWuvi2+0MAZrQHmzHhPTMaoUfyQ==
   dependencies:
     abort-controller "^3.0.0"
     characterset "^1.3.0"
