@@ -1,4 +1,6 @@
-export const DEFAULT: SA.Config.DefaultOptions = {
+import { DefaultOptions } from "../types/config";
+
+export const DEFAULT: DefaultOptions = {
 	PUPPETEER_OPTIONS: {
 		concurrency: 2,
 		maxConcurrency: 10,

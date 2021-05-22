@@ -4,11 +4,13 @@ import { Cluster } from 'puppeteer-cluster';
 import { DEFAULT } from '../config/configuration';
 import { TaskFunctionArguments } from '../types/cluster-options';
 import { Sustainability } from 'sustainability'
+import IORedis from 'ioredis';
 
 export default class Runner {
 	private cluster: Cluster = {} as Cluster;
 	private redisHost = process.env.REDIS_HOST || "127.0.0.1"
 	private redisPort = process.env.REDIS_PORT || "6379"
+	private redisURL = process.env.REDIS_URL || ''
 
 	async init() {
 		this.cluster = await PuppeteerCluster.setUp();
@@ -31,7 +33,8 @@ export default class Runner {
 					return undefined
 				}
 			},
-			{ concurrency: DEFAULT.PUPPETEER_OPTIONS.maxConcurrency, connection: { host: this.redisHost, port: +this.redisPort } }
+			{ concurrency: DEFAULT.PUPPETEER_OPTIONS.maxConcurrency, connection: this.redisURL? new IORedis(this.redisURL) : { host: this.redisHost, port: +this.redisPort }
+		}
 		);
 	}
 

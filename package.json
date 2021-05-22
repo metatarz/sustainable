@@ -13,7 +13,6 @@
   "author": "David Monras",
   "license": "AGPL-3.0",
   "devDependencies": {
-    "@types/bull": "^3.12.2",
     "@types/express": "^4.17.6",
     "@types/jest": "^26.0.0",
     "@types/node": "^14.0.13",

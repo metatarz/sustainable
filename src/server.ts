@@ -2,6 +2,7 @@ import { urlIsValid } from './helpers/validUrl';
 import { Queue, QueueEvents } from 'bullmq';
 import Runner from './runner/runner';
 import express = require('express');
+import IORedis from 'ioredis';
 const bodyParser = require('body-parser');
 
 
@@ -10,6 +11,7 @@ export default class App {
 	private readonly runner: Runner = new Runner();
 	private redisHost = process.env.REDIS_HOST || "127.0.0.1"
 	private redisPort = process.env.REDIS_PORT || "6379"
+	private redisURL = process.env.REDIS_URL || ''
 
 	async init() {
 		try {
@@ -32,7 +34,8 @@ export default class App {
 	private initRedis(): Queue {
 
 		const queue = new Queue('main', {
-			connection: { host: this.redisHost, port: +this.redisPort }
+			connection: this.redisURL? new IORedis(this.redisURL) : { host: this.redisHost, port: +this.redisPort }
+
 		});
 		if (process.env.NODE_ENV !== 'production') {
 			this.queueEvents();
@@ -43,8 +46,7 @@ export default class App {
 
 	private queueEvents() {
 		const queueEvents = new QueueEvents('main', {
-			connection: { host: this.redisHost, port: +this.redisPort }
-
+			connection: this.redisURL? new IORedis(this.redisURL) : { host: this.redisHost, port: +this.redisPort }
 
 		});
 		queueEvents.on('waiting', ({ jobId }) => {
@@ -65,8 +67,9 @@ export default class App {
 	}
 
 	private listeners(app: express.Application, queue: Queue): void {
+		
 		const queueEvents = new QueueEvents('main', {
-			connection: { host: this.redisHost, port: +this.redisPort }
+			connection: this.redisURL? new IORedis(this.redisURL) : { host: this.redisHost, port: +this.redisPort }
 
 		});
 
@@ -101,6 +104,7 @@ export default class App {
 						}
 					});
 				} catch (e) {
+					console.log(e)
 					return res.status(400).send({ status: 'Error unknown URL' });
 
 				}
