@@ -30,7 +30,7 @@
     "bullmq": "^1.14.0",
     "express": "^4.17.1",
     "ioredis": "^4.19.4",
-    "node-fetch": "^2.6.0",
+    "node-fetch": "^2.6.7",
     "puppeteer": "^5.2.1",
     "puppeteer-cluster": "^0.22.0",
     "sustainability": "0.4.14"
